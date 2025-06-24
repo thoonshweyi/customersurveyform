@@ -1,157 +1,129 @@
-import React,{useState} from "react";
-import {useSearchParams,useLocation} from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import PersonalInfo from "./PersonalInfo";
-import QuestionsList from "./QuestionsList";
+import QuestionsPage from "./QuestionsPage";
 
+export default function AddCustomerSurvey() {
+  const [formState, setFormState] = useState({
+    name: "",
+    age: "",
+    gender: "",
+    township: "",
+  });
 
-export default function AddCustomerSurvey(){
-    const defaultselectvalue = 'Choose a township'
-    const init = {
-        name: "",
-        age: "",
-        gender: "",
-        township:"",
-        hobbies: [],
+  const [questionAnswers, setQuestionAnswers] = useState({});
+  const [questions, setQuestions] = useState([]);
+  const [step, setStep] = useState(0); // Step 0 = Personal Info
+
+  const QUESTIONS_PER_PAGE = 5;
+
+  useEffect(() => {
+    axios.get("http://localhost:5000/api/questions").then(res => {
+      const fetched = res.data;
+      setQuestions(fetched);
+
+      const initialAnswers = {};
+      fetched.forEach(q => {
+        initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+      });
+      setQuestionAnswers(initialAnswers);
+    });
+  }, []);
+
+  const handleChange = (e) => {
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+  };
+
+  const handleAnswerChange = (qId, value, isMulti = false) => {
+    setQuestionAnswers(prev => {
+      if (isMulti) {
+        const updated = prev[qId].includes(value)
+          ? prev[qId].filter(v => v !== value)
+          : [...prev[qId], value];
+        return { ...prev, [qId]: updated };
+      } else {
+        return { ...prev, [qId]: value };
+      }
+    });
+  };
+
+  const totalSteps = Math.ceil(questions.length / QUESTIONS_PER_PAGE) + 1;
+
+  const validateCurrentStep = () => {
+    if (step === 0) {
+      return formState.name && formState.age && formState.township;
     }
-    const [formState,setFormState] = useState(init);
-    const [stepState,setStepState] = useState(1);
+    const startIndex = (step - 1) * QUESTIONS_PER_PAGE;
+    const currentQuestions = questions.slice(startIndex, startIndex + QUESTIONS_PER_PAGE);
 
-    const changeHandler = e=>{
-        // console.log(e.target);
-        // console.log(e.target.name);
-        // console.log(e.target.id);
-        // console.log(e.target.value);
+    return currentQuestions.every(q => {
+      const a = questionAnswers[q.id];
+      return q.type === "checkbox" ? a && a.length > 0 : a !== "";
+    });
+  };
 
-        // console.log(formState); // {firstname: '', lastname: '', city: ''}
-
-        setFormState({
-            ...formState, // spread operator
-            [e.target.name]:e.target.value
-        });
-        // to mix with previous formState value
-        // overwrite the previous formState with the entered input value
-
-        //  console.log(formState);
-     }     
-
-    const checkHobbyHandler = (e)=>{
-        let hobbyvalue = e.target.value;
-        if(formState.hobbies.some(hobby=>hobby === hobbyvalue)){
-          const filterhobby = formState.hobbies.filter(hobby=>hobby != hobbyvalue);
-          setFormState(prev=>{
-               return {...prev,hobbies:filterhobby};
-          });
-        }else{
-          setFormState(prev=>{
-               return {...prev,hobbies:[...prev.hobbies,hobbyvalue]}
-          });
+    const nextStep = (e) => {
+        e.preventDefault();
+        if (!validateCurrentStep()) {
+        alert("Please answer all required fields.");
+        return;
         }
-    }
-
-    
-    const checkedhobby = (hobbyvalue)=>{
-          return formState.hobbies.some(hobby=>hobby == hobbyvalue);
-    }
-
-    const checkedHandler = (e)=>{
-        let value = e.target.value;
-        let names = e.target.name;
-        console.log(formState[names]);
-        if(formState[names].some(name=>name === value)){
-          const filternames = formState[names].filter(name=>name != value);
-          setFormState(prev=>{
-               return {...prev,[names]:filternames};
-          });
-        }else{
-          setFormState(prev=>{
-               return {...prev,[names]:[...prev[names],value]}
-          });
-        }
-    }
-
-    const checkedInput = (inputnames,inputvalue)=>{
-
-        if(formState[inputnames] === undefined){
-            return false;
-        }
-        return formState[inputnames].some(inputname=>inputname == inputvalue);
-    }
-
-
-    const submitHandler = (e)=>{
-          e.preventDefault();
-
-          console.log(formState);
-        //   settasks(prev=>{
-        //        return [...prev,formState]
-        //   });
-
-        //   setFormState({
-        //        name:"",
-        //        quantity:1,
-        //        tags:[],
-        //        package:""
-        //   });
-    }
-
-    const addQuestionInit = (prop)=>{
-        setFormState(prev=>{
-            return {
-            ...prev,
-            ...prop
-            }
-        })
-    }
-
-    const [searchParams] = useSearchParams();
-    let page = searchParams.get('page');
-    // console.log(page);
-
-    const renderStep = () => {
-        switch (stepState) {
-            case 1:
-                return <PersonalInfo changeHandler={changeHandler} formState={formState} checkHobbyHandler={checkHobbyHandler} checkedhobby={checkedhobby} />;
-            case 2:
-                return <QuestionsList changeHandler={changeHandler} formState={formState} checkedHandler={checkedHandler} checkedInput={checkedInput} addQuestionInit={addQuestionInit} />;
-            // case 3:
-            //     return <Step3 ... />;
-            default:
-                return <div>Form Completed</div>;
-        }
+        setStep(prev => prev + 1);
     };
 
-    const nextStep = () => {
-        setStepState(prev => prev + 1);
+    const prevStep = (e) => {
+        e.preventDefault();
+        if (step > 0) setStep(prev => prev - 1);
     };
 
-    const prevStep = () => {
-        setStepState(prev => (prev > 1 ? prev - 1 : 1));
-    };
+  const submitHandler = (e) => {
+    e.preventDefault();
+    const data = { ...formState, answers: questionAnswers };
+    console.log(data);
+    // axios.post("/api/submit-survey", data)
+    //   .then(() => alert("Survey submitted successfully!"))
+    //   .catch(err => console.error(err));
+  };
 
-
-    return (
-            <div className="container csform-container">
-               <form action="" method="" onSubmit={submitHandler}>
-    
-                    <div className="csform-header">
-                        <h2 className="mb-2">Customer Satisfaction Survey</h2>
-                    </div>
-
-                    <div className="required-text">
-                    * Indicates required question
-                    </div>
-
-
-                    {renderStep()}
-
-                    <div className="d-flex justify-content-between align-item-center py-2">
-                        {stepState > 1 ? <button type="button" onClick={prevStep} className="btn btn-secondary">Previous</button> : <span></span>}
-                        {stepState < 3
-                        ? <button type="button" onClick={nextStep} className="btn btn-primary">Next</button>
-                            : <button type="submit" className="btn btn-success">Submit</button>
-                        }
-                    </div>
-                </form>
+  return (
+    <div className="container csform-container">
+      <form action="" method=""  onSubmit={submitHandler}>
+            <div className="csform-header">
+                <h2 className="mb-2">Customer Satisfaction Survey</h2>
             </div>
-    );
+
+            <div className="required-text">
+            * Indicates required question
+            </div>
+
+        {step === 0 ? (
+          <PersonalInfo formState={formState} handleChange={handleChange} />
+        ) : (
+          <QuestionsPage
+            questions={questions.slice((step - 1) * QUESTIONS_PER_PAGE, step * QUESTIONS_PER_PAGE)}
+            answers={questionAnswers}
+            onAnswerChange={handleAnswerChange}
+          />
+        )}
+
+        <div className="d-flex justify-content-between mt-4">
+          {step > 0 && (
+            <button type="button" onClick={prevStep} className="btn btn-secondary">
+              Previous
+            </button>
+          )}
+
+          {step < totalSteps - 1 ? (
+            <button type="button" onClick={nextStep} className="btn btn-primary">
+              Next
+            </button>
+          ) : (
+            <button type="submit" className="btn btn-success">
+              Submit
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
+  );
 }

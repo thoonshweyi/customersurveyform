@@ -1,56 +1,64 @@
+export default function PersonalInfo({ formState, handleChange }) {
+  return (
+    <>
+        <div className="csform-card">
+            <label className="form-label mb-0">Name *</label>
+            <input type="text" name="name" value={formState.name} onChange={handleChange} className="form-control  underline-only" />
+        </div>
 
-
-
-export default function PersonalInfo({changeHandler,formState,checkHobbyHandler,checkedhobby}){
-    return (
-        <>
-            <div className="csform-card">
-                <label className="form-label mb-2">Name</label>
-                <input type="text" className="form-control underline-only" name="name" id="name" onChange={changeHandler} value={formState.name} placeholder="Please Enter Your Name" />
-            </div>
-
-            <div className="csform-card">
-                <label className="form-label mb-2">Age</label>
-                <input type="number" className="form-control underline-only" name="age" id="age" onChange={changeHandler} value={formState.age} placeholder="Please Enter Age" />
-            </div>
+        <div className="csform-card">
+            <label className="form-label mb-2">Age *</label>
+            <input type="number" name="age" value={formState.age} onChange={handleChange} className="form-control  underline-only" />
+        </div>
 
         
-            <div className="csform-card">
-                <label  className="form-label mb-2">Gender</label>
-                <div className="form-check">
-                    <input type="radio" name="gender" id="genderm"  className="form-check-input"  onChange={changeHandler} value="1" />
-                    <label htmlFor="genderm" >Male</label>
+        <div className="csform-card">
+                <label className="form-label d-block mb-2">Gender *</label>
+                <div className="form-check form-check-inline">
+                    <input
+                        type="radio"
+                        id="gender_male"
+                        name="gender"
+                        value="male"
+                        checked={formState.gender === "male"}
+                        onChange={handleChange}
+                        className="form-check-input"
+                    />
+                    <label htmlFor="gender_male" className="form-check-label">Male</label>
                 </div>
-                
-                <div className="form-check">
-                    <input type="radio" name="gender" id="genderf"  className="form-check-input"  onChange={changeHandler} value="0"  />
-                    <label htmlFor="genderf">Female</label>
-                </div>
-            </div>
 
-            <div className="csform-card">
-                <label htmlFor="township" className="form-label mb-2">Township</label>
-                <select name="township" id="township" onChange={changeHandler} value={formState.township} className="form-control underline-only">
-                    {/* <option>{defaultselectvalue}</option> */}
-                    <option value="mm">Hlaing</option>
-                    <option value="th">Insein</option>
-                    <option value="indo">Tamwe</option>   
-                </select>
-                <span>{formState.country}</span>
-            </div>
+                <div className="form-check form-check-inline">
+                    <input
+                        type="radio"
+                        id="gender_female"
+                        name="gender"
+                        value="female"
+                        checked={formState.gender === "female"}
+                        onChange={handleChange}
+                        className="form-check-input"
+                    />
+                    <label htmlFor="gender_female" className="form-check-label">Female</label>
+                </div>
+        </div>
 
-            <div className="csform-card">
-                <label  className="form-label mb-2">Hobbies</label>
-                <div className="form-check">
-                    <input type="checkbox" name="hobbies" id="hobby1"  className="form-check-input"  onChange={checkHobbyHandler} value="1" checked={checkedhobby(1)}/>
-                    <label htmlFor="hobby1" >Football</label>
-                </div>
-                <div className="form-check">
-                    <input type="checkbox" name="hobbies" id="hobby2"  className="form-check-input"  onChange={checkHobbyHandler} value="2" checked={checkedhobby(2)}/>
-                    <label htmlFor="hobby2" >Swimming</label>
-                </div>
-            
-            </div>
-        </>
-    );
+        <div className="csform-card">
+            <label className="form-label mb-2">Township *</label>
+            <select
+            name="township"
+            value={formState.township}
+            onChange={handleChange}
+            className="form-control"
+            required
+            >
+            <option value="">-- Select Township --</option>
+            <option value="kamayut">Kamayut</option>
+            <option value="hlaing">Hlaing</option>
+            <option value="mayangone">Mayangone</option>
+            <option value="thingangyun">Thingangyun</option>
+            <option value="sanchaung">Sanchaung</option>
+            </select>
+        </div>
+
+    </>
+  );
 }
