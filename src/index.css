@@ -1,0 +1,78 @@
+body {
+  	background-color: #e7f0fc;
+	/* height: 100vh;
+	overflow: hidden; */
+}
+.card-custom {
+	border-radius: 1rem;
+	box-shadow: 0 0 30px rgba(0, 123, 255, 0.1);
+}
+
+.btn-custom {
+	background-color: #0d6efd;
+	color: white;
+}
+
+.btn-custom:hover {
+	background-color: #0b5ed7;
+}
+
+
+.csform-container {
+	max-width: 700px;
+	margin: 2rem auto;
+}
+
+.csform-header {
+	background-color: white;
+	border-top: 8px solid #0d6efd;
+	border-radius: 8px 8px 0 0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	padding: 1rem;
+}
+
+.csform-card {
+	background-color: white;
+	border-radius: 8px;
+	padding: 1.5rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	margin-top: 1rem;
+}
+
+.form-label {
+      font-weight: 500;
+}
+
+.required-text {
+	color: red;
+	font-size: 0.9rem;
+	padding: 0.5rem 1.5rem;
+	background-color: white;
+	border-bottom: 1px solid #ddd;
+}
+
+.form-control.underline-only {
+	border: none;
+	border-bottom: 1px solid #ccc;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.form-control.underline-only:focus {
+	border-bottom: 2px solid #0d6efd;
+	box-shadow: none;
+}
+
+.form-check-input:checked {
+	background-color: #0d6efd;
+	border-color: #0d6efd;
+}
+
+a {
+	color: #1a73e8;
+	text-decoration: none;
+}
+
+/* a:hover {
+	text-decoration: underline;
+} */
