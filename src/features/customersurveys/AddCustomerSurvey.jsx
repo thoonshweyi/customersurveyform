@@ -1,33 +1,52 @@
 import { useEffect, useState } from "react";
+import {useDispatch} from "react-redux";
+import {useNavigate} from "react-router"
 import axios from "axios";
 import PersonalInfo from "./PersonalInfo";
 import QuestionsPage from "./QuestionsPage";
+import { addsurvey } from "../../store/surveysreducer";
 
 export default function AddCustomerSurvey() {
-  const [formState, setFormState] = useState({
-    name: "",
-    age: "",
-    gender: "",
-    township: "",
-  });
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
 
   const [questionAnswers, setQuestionAnswers] = useState({});
   const [questions, setQuestions] = useState([]);
   const [step, setStep] = useState(0); // Step 0 = Personal Info
+  const [errors, setErrors] = useState({});
 
+
+
+  
   const QUESTIONS_PER_PAGE = 5;
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/questions").then(res => {
-      const fetched = res.data;
-      setQuestions(fetched);
+    // First API Call
+      axios.get("http://localhost:5000/api/headerques").then(res => {
+        const fetched = res.data;
+        setQuestions(fetched);
 
-      const initialAnswers = {};
-      fetched.forEach(q => {
-        initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+        const initialAnswers = {};
+        fetched.forEach(q => {
+          initialAnswers[q.uuid] = q.type === "checkbox" ? [] : "";
+        });
+        setQuestionAnswers(initialAnswers);
+
+        // Nested second call only after first one completes
+        axios.get("http://localhost:5000/api/questions").then(res => {
+          const moreFetched = res.data;
+
+          setQuestions(prev => [...prev, ...moreFetched]);
+
+          const moreAnswers = {};
+          moreFetched.forEach(q => {
+            moreAnswers[q.uuid] = q.type === "checkbox" ? [] : "";
+          });
+
+          setQuestionAnswers(prev => ({ ...prev, ...moreAnswers }));
+        });
       });
-      setQuestionAnswers(initialAnswers);
-    });
   }, []);
 
   const handleChange = (e) => {
@@ -35,6 +54,7 @@ export default function AddCustomerSurvey() {
   };
 
   const handleAnswerChange = (qId, value, isMulti = false) => {
+    console.log()
     setQuestionAnswers(prev => {
       if (isMulti) {
         const updated = prev[qId].includes(value)
@@ -47,26 +67,36 @@ export default function AddCustomerSurvey() {
     });
   };
 
-  const totalSteps = Math.ceil(questions.length / QUESTIONS_PER_PAGE) + 1;
+  const totalSteps = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
 
   const validateCurrentStep = () => {
-    if (step === 0) {
-      return formState.name && formState.age && formState.township;
-    }
-    const startIndex = (step - 1) * QUESTIONS_PER_PAGE;
+    
+    const startIndex = (step) * QUESTIONS_PER_PAGE;
     const currentQuestions = questions.slice(startIndex, startIndex + QUESTIONS_PER_PAGE);
+    const newErrors = {};
 
-    return currentQuestions.every(q => {
-      const a = questionAnswers[q.id];
-      return q.type === "checkbox" ? a && a.length > 0 : a !== "";
+     currentQuestions.forEach(q => {
+      const a = questionAnswers[q.uuid];
+      if (q.type === "checkbox") {
+        if (!a || a.length === 0) {
+          newErrors[q.uuid] = "Please select at least one option.";
+        }
+      } else {
+        if (!a || a === "") {
+          newErrors[q.uuid] = "This question is required.";
+        }
+      }
     });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
     const nextStep = (e) => {
         e.preventDefault();
         if (!validateCurrentStep()) {
-        alert("Please answer all required fields.");
-        return;
+        // alert("Please answer all required fields.");
+        return false;
         }
         setStep(prev => prev + 1);
     };
@@ -76,13 +106,16 @@ export default function AddCustomerSurvey() {
         if (step > 0) setStep(prev => prev - 1);
     };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
-    const data = { ...formState, answers: questionAnswers };
+    const data = { answers: questionAnswers };
     console.log(data);
-    // axios.post("/api/submit-survey", data)
-    //   .then(() => alert("Survey submitted successfully!"))
-    //   .catch(err => console.error(err));
+      try{
+            await dispatch(addsurvey(data)).unwrap();
+            // navigate('/');
+      }catch(err){
+            console.log('Add user failed',err);
+      }
   };
 
   return (
@@ -96,15 +129,13 @@ export default function AddCustomerSurvey() {
             * Indicates required question
             </div>
 
-        {step === 0 ? (
-          <PersonalInfo formState={formState} handleChange={handleChange} />
-        ) : (
+        
           <QuestionsPage
-            questions={questions.slice((step - 1) * QUESTIONS_PER_PAGE, step * QUESTIONS_PER_PAGE)}
+            questions={questions.slice((step) * QUESTIONS_PER_PAGE, (step + 1) * QUESTIONS_PER_PAGE)}
             answers={questionAnswers}
             onAnswerChange={handleAnswerChange}
+            errors={errors}
           />
-        )}
 
         <div className="d-flex justify-content-between mt-4">
           {step > 0 && (
@@ -114,7 +145,7 @@ export default function AddCustomerSurvey() {
           )}
 
           {step < totalSteps - 1 ? (
-            <button type="button" onClick={nextStep} className="btn btn-primary">
+            <button type="button" onClick={nextStep} className="btn btn-primary ms-auto">
               Next
             </button>
           ) : (
