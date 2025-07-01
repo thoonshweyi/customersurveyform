@@ -1,96 +1,94 @@
 import { useEffect, useState } from "react";
 import {useDispatch} from "react-redux";
-import {useNavigate} from "react-router"
+import {useNavigate,useParams} from "react-router"
 import axios from "axios";
-import PersonalInfo from "./PersonalInfo";
 import QuestionsPage from "./QuestionsPage";
-import { addsurvey } from "../../store/surveysreducer";
+import { addsurveyresponse } from "../../store/surveyresponsesreducer";
 
 export default function AddCustomerSurvey() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-
-  const [questionAnswers, setQuestionAnswers] = useState({});
-  const [questions, setQuestions] = useState([]);
-  const [step, setStep] = useState(0); // Step 0 = Personal Info
-  const [errors, setErrors] = useState({});
-
-
-
   
-  const QUESTIONS_PER_PAGE = 5;
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const {id} = useParams();
+	console.log(id);
 
-  useEffect(() => {
-    // First API Call
-      axios.get("http://localhost:5000/api/headerques").then(res => {
-        const fetched = res.data;
-        setQuestions(fetched);
+	const [form, setForm] = useState({ title: "", description: "", sections: [] });
+	const [questionAnswers, setQuestionAnswers] = useState({});
+	const [step, setStep] = useState(0);
+	const [errors, setErrors] = useState({});
 
-        const initialAnswers = {};
-        fetched.forEach(q => {
-          initialAnswers[q.uuid] = q.type === "checkbox" ? [] : "";
-        });
-        setQuestionAnswers(initialAnswers);
 
-        // Nested second call only after first one completes
-        axios.get("http://localhost:5000/api/questions").then(res => {
-          const moreFetched = res.data;
+	useEffect(() => {
+	axios.get(`http://127.0.0.1:8000/api/forms/${id}`).then(res => {
+		const fetched = res.data;
 
-          setQuestions(prev => [...prev, ...moreFetched]);
+		setForm(fetched); // ⬅️ store full form object
 
-          const moreAnswers = {};
-          moreFetched.forEach(q => {
-            moreAnswers[q.uuid] = q.type === "checkbox" ? [] : "";
-          });
+		// Initialize answers for all questions
+		const initialAnswers = {};
+		fetched.sections.forEach(section => {
+			section.questions.forEach(q => {
+				initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+			});
+		});
 
-          setQuestionAnswers(prev => ({ ...prev, ...moreAnswers }));
-        });
-      });
-  }, []);
+		setQuestionAnswers(initialAnswers);
+	});
+	}, []);
 
-  const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value });
-  };
 
-  const handleAnswerChange = (qId, value, isMulti = false) => {
-    console.log()
-    setQuestionAnswers(prev => {
-      if (isMulti) {
-        const updated = prev[qId].includes(value)
-          ? prev[qId].filter(v => v !== value)
-          : [...prev[qId], value];
-        return { ...prev, [qId]: updated };
-      } else {
-        return { ...prev, [qId]: value };
-      }
-    });
-  };
+	const currentSection = form.sections[step] || {};
+	const currentQuestions = currentSection.questions || [];
 
-  const totalSteps = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
+	const handleAnswerChange = (qId, value, isMulti = false) => {
+		console.log(questionAnswers);
+		setQuestionAnswers(prev => {
+		if (isMulti) {
+			const updated = prev[qId].includes(value)
+			? prev[qId].filter(v => v !== value)
+			: [...prev[qId], value];
+			return { ...prev, [qId]: updated };
+		} else {
+			return { ...prev, [qId]: value };
+		}
+		});
+	};
 
-  const validateCurrentStep = () => {
-    
-    const startIndex = (step) * QUESTIONS_PER_PAGE;
-    const currentQuestions = questions.slice(startIndex, startIndex + QUESTIONS_PER_PAGE);
-    const newErrors = {};
+  	const totalSteps = form.sections.length;
 
-     currentQuestions.forEach(q => {
-      const a = questionAnswers[q.uuid];
-      if (q.type === "checkbox") {
-        if (!a || a.length === 0) {
-          newErrors[q.uuid] = "Please select at least one option.";
-        }
-      } else {
-        if (!a || a === "") {
-          newErrors[q.uuid] = "This question is required.";
-        }
-      }
-    });
+	const validateCurrentStep = () => {
+		const newErrors = {};
+		currentQuestions.forEach(q => {
+			const a = questionAnswers[q.id];
+			if (q.type === "checkbox") {
+				if (!a || a.length === 0) newErrors[q.id] = "Please select at least one option.";
+			} else {
+				if (!a || a === "") newErrors[q.id] = "This question is required.";
+			}
+		});
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+		setErrors(newErrors);
+		return Object.keys(newErrors).length === 0;
+	};
+
+
+	
+	const validateAllStep = () => {
+		const newErrors = {};
+		form.sections.forEach(s=>{
+			s.questions.forEach(q => {
+				const a = questionAnswers[q.id];
+				if (q.type === "checkbox") {
+					if (!a || a.length === 0) newErrors[q.id] = "Please select at least one option.";
+				} else {
+					if (!a || a === "") newErrors[q.id] = "This question is required.";
+				}
+			});
+		});
+		
+		setErrors(newErrors);
+		return Object.keys(newErrors).length === 0;
+	};
 
     const nextStep = (e) => {
         e.preventDefault();
@@ -106,23 +104,27 @@ export default function AddCustomerSurvey() {
         if (step > 0) setStep(prev => prev - 1);
     };
 
-  const submitHandler = async (e) => {
+  const submitHandler = async (e) => { 
     e.preventDefault();
-    const data = { answers: questionAnswers };
-    console.log(data);
-      try{
-            await dispatch(addsurvey(data)).unwrap();
-            // navigate('/');
-      }catch(err){
-            console.log('Add user failed',err);
-      }
+	if (!validateAllStep()) {
+		return false;
+	}
+	const data = { questionanswers: questionAnswers };
+	console.log(data);
+	try{
+			await dispatch(addsurveyresponse(data)).unwrap();
+			// navigate('/');
+	}catch(err){
+			console.log('Add user failed',err);
+	}
   };
 
   return (
     <div className="container csform-container">
       <form action="" method=""  onSubmit={submitHandler}>
             <div className="csform-header">
-                <h2 className="mb-2">Customer Satisfaction Survey</h2>
+                <h2 className="mb-2">{ form.title }</h2>
+				<p className="mb-0">{form.description}</p>
             </div>
 
             <div className="required-text">
@@ -130,12 +132,30 @@ export default function AddCustomerSurvey() {
             </div>
 
         
-          <QuestionsPage
-            questions={questions.slice((step) * QUESTIONS_PER_PAGE, (step + 1) * QUESTIONS_PER_PAGE)}
-            answers={questionAnswers}
-            onAnswerChange={handleAnswerChange}
-            errors={errors}
-          />
+          	{currentSection && (
+				<div className="mb-4">
+					{/* <h4 className="mb-1">{currentSection.title}</h4>
+					<p className="text-muted">{currentSection.description}</p> */}
+
+					<div className="d-flex justify-content-between mt-2">
+							<h6 className="section-header m-0">{currentSection.title}</h6>
+					</div>
+
+					<div className="section-card">
+						<div className="row">
+							{/* <h4 className="mb-1">{currentSection.title}</h4> */}
+							<p className="text-muted">{currentSection.description}</p> 
+						</div>
+					</div>
+
+					<QuestionsPage
+					questions={currentQuestions}
+					answers={questionAnswers}
+					onAnswerChange={handleAnswerChange}
+					errors={errors}
+					/>
+				</div>
+			)}
 
         <div className="d-flex justify-content-between mt-4">
           {step > 0 && (

@@ -13,7 +13,7 @@ export default function Welcome(){
                 {/* <a href="#start-survey" className="btn btn-custom px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite">
                     Start Survey
                 </a> */}
-                <Link to="/customersurveys/create"  className="btn btn-custom px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite">Start  Survey</Link>
+                <Link to="/forms/1"  className="btn btn-custom px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite">Start  Survey</Link>
                 <div className="text-muted mt-4 small">
                     Your answers are confidential and help improve our services.
                 </div>

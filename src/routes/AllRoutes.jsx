@@ -12,7 +12,7 @@ export default function AllRoutes(){
                     <Route path="/edit/:id" element={<EditUser/>} />
                     <Route path="/delete/:id" element={<DeleteUser/>} /> */}
                     
-                    <Route path="/customersurveys/create" element={<AddCustomerSurvey/>} />
+                    <Route path="/forms/:id" element={<AddCustomerSurvey/>} />
                     
                 </Routes>
             </Router>

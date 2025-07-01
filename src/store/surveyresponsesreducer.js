@@ -1,28 +1,28 @@
 import {createSlice,createAsyncThunk} from "@reduxjs/toolkit";
 import axios from "axios";
 
-// const BASEURL = `https://jsonplaceholder.typicode.com/surveys`;
-const BASEURL = `http://localhost:5000/api/surveys`;
+// const BASEURL = `https://jsonplaceholder.typicode.com/surveyresponses`;
+const BASEURL = `http://localhost:5000/api/surveyresponses`;
 
 
 
-export const addsurvey = createAsyncThunk('data/addsurvey',async(obj,{fulfillWithValue,rejectWithValue})=>{
+export const addsurveyresponse = createAsyncThunk('data/addsurveyresponse',async(obj,{fulfillWithValue,rejectWithValue})=>{
      try{
         //   const res = await axios.post(BASEURL,obj);
-        //   console.log(obj);
+          console.log(obj);
         //   console.log(res);
         //   return fulfillWithValue(res.data);
         return fulfillWithValue({message:'success'})
      }catch(err){
-          return rejectWithValue('Something went wrong in add survey',err);
+          return rejectWithValue('Something went wrong in add surveyresponse',err);
      }
 })
 
 
-export const surveySlice = createSlice({
-     name: "surveys",
+export const surveyresponseSlice = createSlice({
+     name: "surveyresponses",
      initialState: {
-          surveys: [],
+          surveyresponses: [],
           loading: false,
           error: null
      },
@@ -32,19 +32,19 @@ export const surveySlice = createSlice({
      },
      extraReducers: (builder)=>{
           builder 
-               .addCase(addsurvey.pending, (state) => {
+               .addCase(addsurveyresponse.pending, (state) => {
       
                     console.log('Pending')
                     // state.loading = true;
                 })
-               .addCase(addsurvey.fulfilled,(state,action)=>{
+               .addCase(addsurveyresponse.fulfilled,(state,action)=>{
                     // state.loading = false;
                     // state.error = null;
 
-                    // state.surveys = action.payload;
+                    // state.surveyresponses = action.payload;
                     console.log(action.payload);
                })
-               .addCase(addsurvey.rejected,(state,action)=>{
+               .addCase(addsurveyresponse.rejected,(state,action)=>{
                     // state.loading = false;
                     // state.error = action.payload;
                })
@@ -52,4 +52,4 @@ export const surveySlice = createSlice({
      }
 })
 
-export default surveySlice.reducer;
+export default surveyresponseSlice.reducer;

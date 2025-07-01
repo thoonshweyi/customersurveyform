@@ -1,8 +1,8 @@
 import {configureStore} from "@reduxjs/toolkit";
-import surveysReducer from "./surveysreducer";
+import surveyresponsesReducer from "./surveyresponsesreducer";
 
 export default configureStore({
      reducer:{
-        surveys: surveysReducer
+        surveyresponses: surveyresponsesReducer
      }
 })
