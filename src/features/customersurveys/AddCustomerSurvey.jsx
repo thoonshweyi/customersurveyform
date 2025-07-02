@@ -1,28 +1,32 @@
 import { useEffect, useState } from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch,useSelector} from "react-redux";
 import {useNavigate,useParams} from "react-router"
+import {useSearchParams,useLocation} from "react-router-dom";
 import axios from "axios";
 import QuestionsPage from "./QuestionsPage";
 import { addsurveyresponse } from "../../store/surveyresponsesreducer";
 
 export default function AddCustomerSurvey() {
-  
+
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const {id} = useParams();
-	console.log(id);
+	const [searchParams] = useSearchParams();
+	// console.log(id);
+	const branch_id = searchParams.get('branch_id');
+	console.log(branch_id);
 
 	const [form, setForm] = useState({ title: "", description: "", sections: [] });
 	const [questionAnswers, setQuestionAnswers] = useState({});
 	const [step, setStep] = useState(0);
 	const [errors, setErrors] = useState({});
-
+ 	const loading = useSelector(state=>state.surveyresponses.loading);
 
 	useEffect(() => {
 	axios.get(`http://127.0.0.1:8000/api/forms/${id}`).then(res => {
 		const fetched = res.data;
 
-		setForm(fetched); // ⬅️ store full form object
+		setForm(fetched); //
 
 		// Initialize answers for all questions
 		const initialAnswers = {};
@@ -41,7 +45,7 @@ export default function AddCustomerSurvey() {
 	const currentQuestions = currentSection.questions || [];
 
 	const handleAnswerChange = (qId, value, isMulti = false) => {
-		console.log(questionAnswers);
+		// console.log(questionAnswers);
 		setQuestionAnswers(prev => {
 		if (isMulti) {
 			const updated = prev[qId].includes(value)
@@ -109,15 +113,24 @@ export default function AddCustomerSurvey() {
 	if (!validateAllStep()) {
 		return false;
 	}
-	const data = { questionanswers: questionAnswers };
+	const data = { 
+		form_id: id,
+		branch_id: branch_id,
+		questionanswers: questionAnswers 
+	};
 	console.log(data);
 	try{
-			await dispatch(addsurveyresponse(data)).unwrap();
-			// navigate('/');
+		const {surveyresponse} = await dispatch(addsurveyresponse(data)).unwrap();
+		let id = surveyresponse.id
+		navigate(`/surveyresponses/${id}/finish`);
 	}catch(err){
-			console.log('Add user failed',err);
+		console.log('Add Survey Response failed',err);
 	}
   };
+
+   const loadingHandler = ()=>{
+          dispatch({type:"LOADING_START"})
+	}
 
   return (
     <div className="container csform-container">
@@ -169,8 +182,8 @@ export default function AddCustomerSurvey() {
               Next
             </button>
           ) : (
-            <button type="submit" className="btn btn-success">
-              Submit
+            <button type="submit" className="btn btn-success" disabled={loading}>
+               {loading ? "Processing..." : "Submit"}
             </button>
           )}
         </div>

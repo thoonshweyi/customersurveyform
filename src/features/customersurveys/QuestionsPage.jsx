@@ -85,7 +85,7 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
 				const starValue = parseInt(opt.name || opt.value || index + 1);
 
 				return (
-					<div>
+					<div key={index} className="text-center">
 						<div className="form-group">
 										<label>{opt.name}</label>
 						</div>

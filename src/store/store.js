@@ -3,6 +3,6 @@ import surveyresponsesReducer from "./surveyresponsesreducer";
 
 export default configureStore({
      reducer:{
-        surveyresponses: surveyresponsesReducer
+         surveyresponses: surveyresponsesReducer,
      }
 })
