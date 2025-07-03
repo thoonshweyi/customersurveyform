@@ -4,6 +4,8 @@ import {useNavigate, useParams} from "react-router"
 export  default function FinishPage(){
     const {id} = useParams();
     const currentsurveyresponse = useSelector((state)=> state.surveyresponses.surveyresponses.find((surveyresponse) => surveyresponse.id == parseInt(id)))
+    const branch_id =  useSelector(state=>state.branches.branch_id);
+    
     return (
         <>
             <div className="container csform-container">
@@ -12,7 +14,7 @@ export  default function FinishPage(){
                             <h2 className="mb-2">Responses For Customer Survey Form</h2>
                             <p className="my-4">Your response has been recorded</p>
 
-                            <Link to="/" className="text-decoration-underline py-4">Submit another response</Link>
+                            <Link to={`/surveyresponses/${branch_id}/start`} className="text-decoration-underline py-4">Submit another response</Link>
                         </div>
                 </form>
             </div>

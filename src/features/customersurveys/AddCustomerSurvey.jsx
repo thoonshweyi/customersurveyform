@@ -10,11 +10,9 @@ export default function AddCustomerSurvey() {
 
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const {id} = useParams();
-	const [searchParams] = useSearchParams();
-	// console.log(id);
-	const branch_id = searchParams.get('branch_id');
-	console.log(branch_id);
+	const {id,branch_id} = useParams();
+
+	console.log(branch_id)
 
 	const [form, setForm] = useState({ title: "", description: "", sections: [] });
 	const [questionAnswers, setQuestionAnswers] = useState({});
