@@ -5,6 +5,7 @@ import {useSearchParams,useLocation} from "react-router-dom";
 import axios from "axios";
 import QuestionsPage from "./QuestionsPage";
 import { addsurveyresponse } from "../../store/surveyresponsesreducer";
+import { setcurrentbranch } from './../../store/branchesreducer'
 
 export default function AddCustomerSurvey() {
 
@@ -38,6 +39,9 @@ export default function AddCustomerSurvey() {
 	});
 	}, []);
 
+	useEffect(() => {
+		dispatch(setcurrentbranch(branch_id))
+	}, []);
 
 	const currentSection = form.sections[step] || {};
 	const currentQuestions = currentSection.questions || [];

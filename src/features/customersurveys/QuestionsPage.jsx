@@ -61,45 +61,45 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
           })}
 
 
-			{q.type === "selectbox" && (
-				<select
-				className="form-select"
-				name={q.id}
-				value={answers[q.id] || ""}
-				onChange={(e) => onAnswerChange(q.id, e.target.value)}
-				>
-					<option value="">-- Please select --</option>
-					{q.options?.map((opt) => (
-						<option key={opt.id} value={opt.id}>
-						{opt.name}
-						</option>
-					))}
-				</select>
-          	)}
+          {q.type === "selectbox" && (
+            <select
+            className="form-select"
+            name={q.id}
+            value={answers[q.id] || ""}
+            onChange={(e) => onAnswerChange(q.id, e.target.value)}
+            >
+              <option value="">-- Please select --</option>
+              {q.options?.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                {opt.name}
+                </option>
+              ))}
+            </select>
+          )}
 
 			
-			{q.type === "rating" && (
-			<div className="d-flex justify-content-around align-items-center mb-2">
-				{q.options?.map((opt, index) => {
-				const selected = parseInt(answers[q.id]) || 0;
-				const starValue = parseInt(opt.name || opt.value || index + 1);
+          {q.type === "rating" && (
+            <div className="d-flex justify-content-around align-items-center mb-2">
+              {q.options?.map((opt, index) => {
+                const selectedOptionId = answers[q.id];
+                const selectedIndex = q.options.findIndex(o => o.id === selectedOptionId);
+                const isFilled = index <= selectedIndex;
 
-				return (
-					<div key={index} className="text-center">
-						<div className="form-group">
-										<label>{opt.name}</label>
-						</div>
-						<i
-						key={opt.id}
-						className={`fa fa-star${selected >= starValue ? "" : "-o"} text-warning`}
-						style={{ fontSize: "1.5rem", cursor: "pointer" }}
-						onClick={() => onAnswerChange(q.id, starValue.toString())}
-						></i>
-					</div>
-				);
-				})}
-			</div>
-			)}
+                return (
+                  <div key={opt.id} className="text-center">
+                    <div className="form-group">
+                      <label>{opt.name}</label>
+                    </div>
+                    <i
+                      className={`fa fa-star${isFilled ? "" : "-o"} text-warning`}
+                      style={{ fontSize: "1.5rem", cursor: "pointer" }}
+                      onClick={() => onAnswerChange(q.id, opt.id)} // ✅ store option.id
+                    ></i>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       ))}
     </>

@@ -9,7 +9,6 @@ export default function StartPage(){
 	const dispatch = useDispatch();
 	const {branch_id} = useParams();
     useEffect(() => {
-        
         dispatch(setcurrentbranch(branch_id))
     }, []);
 
