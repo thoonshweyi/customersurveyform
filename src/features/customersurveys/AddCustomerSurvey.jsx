@@ -6,14 +6,16 @@ import axios from "axios";
 import QuestionsPage from "./QuestionsPage";
 import { addsurveyresponse } from "../../store/surveyresponsesreducer";
 import { setcurrentbranch } from './../../store/branchesreducer'
+import { APP_CONFIG } from './../../config/constant.js';
 
 export default function AddCustomerSurvey() {
-
+	
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const {id,branch_id} = useParams();
 
 	console.log(branch_id)
+	
 
 	const [form, setForm] = useState({ title: "", description: "", sections: [] });
 	const [questionAnswers, setQuestionAnswers] = useState({});
@@ -22,7 +24,7 @@ export default function AddCustomerSurvey() {
  	const loading = useSelector(state=>state.surveyresponses.loading);
 
 	useEffect(() => {
-	axios.get(`http://127.0.0.1:8000/api/forms/${id}`).then(res => {
+	axios.get(`${APP_CONFIG.backendURL}/api/forms/${id}`).then(res => {
 		const fetched = res.data;
 
 		setForm(fetched); //

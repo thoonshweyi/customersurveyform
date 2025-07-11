@@ -1,9 +1,9 @@
 import {createSlice,createAsyncThunk} from "@reduxjs/toolkit";
 import Swal from 'sweetalert2';
 import axios from "axios";
+import { APP_CONFIG } from './../config/constant.js';
 
-// const BASEURL = `https://jsonplaceholder.typicode.com/surveyresponses`;
-const BASEURL = `http://localhost:8000/api/surveyresponses/`;
+const BASEURL = `${APP_CONFIG.backendURL}/api/surveyresponses/`;
 
 
 
