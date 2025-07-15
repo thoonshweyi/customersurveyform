@@ -11,7 +11,12 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
           <label className="form-label">{q.name} <span className="text-danger">*</span></label>
 
           {errors[q.id] && (
-            <div className="text-danger small mb-1">{errors[q.id]}</div>
+            <div className="text-danger small mb-1">
+
+                {Object.values(errors[q.id]).map((msg, index) => (
+                  <div key={index}>{msg}</div>
+                ))}
+            </div>
           )}
 
           {q.type === "text" && (

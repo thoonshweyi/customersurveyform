@@ -26,7 +26,6 @@ export default function AddCustomerSurvey() {
 	useEffect(() => {
 	axios.get(`${APP_CONFIG.backendURL}/api/forms/${id}`).then(res => {
 		const fetched = res.data;
-
 		setForm(fetched); //
 
 		// Initialize answers for all questions
@@ -68,10 +67,27 @@ export default function AddCustomerSurvey() {
 		const newErrors = {};
 		currentQuestions.forEach(q => {
 			const a = questionAnswers[q.id];
+			const fieldErrors = {};
+
 			if (q.type === "checkbox") {
-				if (!a || a.length === 0) newErrors[q.id] = "Please select at least one option.";
+				if (!a || a.length === 0) {
+					fieldErrors.required = "Please select at least one option.";
+				}
 			} else {
-				if (!a || a === "") newErrors[q.id] = "This question is required.";
+				if (!a || a === "") {
+					fieldErrors.required = "This question is required.";
+				}
+				let phoneq = q.name.toLowerCase() == 'phone';
+				if(phoneq){
+					let validphone = isMyanmarPhoneNumber(a);
+					if (!validphone) {
+						fieldErrors.myanmarphone = "This is not a valid Myanmar Phone Number.";
+					}
+				}
+			}
+
+			if (Object.keys(fieldErrors).length > 0) {
+				newErrors[q.id] = fieldErrors;
 			}
 		});
 
@@ -86,17 +102,43 @@ export default function AddCustomerSurvey() {
 		form.sections.forEach(s=>{
 			s.questions.forEach(q => {
 				const a = questionAnswers[q.id];
+				const fieldErrors = {};
+				
+
 				if (q.type === "checkbox") {
-					if (!a || a.length === 0) newErrors[q.id] = "Please select at least one option.";
+					if (!a || a.length === 0) {
+						fieldErrors.required = "Please select at least one option.";
+					}
 				} else {
-					if (!a || a === "") newErrors[q.id] = "This question is required.";
+					if (!a || a === "") {
+						fieldErrors.required = "This question is required.";
+					}
+					console.log(fieldErrors.required);
+					let phoneq = q.name.toLowerCase() == 'phone';
+					if(phoneq){
+						let validphone = isMyanmarPhoneNumber(a);
+						if (!validphone) {
+							fieldErrors.myanmarphone = "This is not a valid Myanmar Phone Number.";
+						}
+					}
+				}
+
+				if (Object.keys(fieldErrors).length > 0) {
+					newErrors[q.id] = fieldErrors;
 				}
 			});
 		});
 		
+		console.log(newErrors);
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
+
+
+	function isMyanmarPhoneNumber(phone) {
+		const regex = /^(09|\+?959)[0-9]{7,9}$/;
+		return regex.test(phone);
+	}
 
     const nextStep = (e) => {
         e.preventDefault();
