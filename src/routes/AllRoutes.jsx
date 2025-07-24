@@ -8,14 +8,9 @@ export default function AllRoutes(){
         <Fragment>
             <Router>
                 <Routes>
-                    <Route path="/" element={<Navigate to="/surveyresponses/1/start" replace />} />
-                    <Route path="/surveyresponses/:branch_id/start" element={<StartPage/>} />
-                    {/* <Route path="/add" element={<AddUser/>} />
-                    <Route path="/edit/:id" element={<EditUser/>} />
-                    <Route path="/delete/:id" element={<DeleteUser/>} /> */}
-                    
-                    <Route path="/forms/:branch_id/:id" element={<AddCustomerSurvey/>} />
-                    <Route path="/surveyresponses/:id/finish" element={<FinishPage/>} />
+                    <Route path="/" element={<Navigate to="/surveyresponses/1/1/create" replace />} />
+                       
+                    <Route path="/surveyresponses/:form_id/:branch_id/create" element={<AddCustomerSurvey/>} />
                     
                 </Routes>
             </Router>

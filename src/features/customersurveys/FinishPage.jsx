@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import {useSelector,useDispatch} from "react-redux";
 import {useNavigate, useParams} from "react-router"
-export  default function FinishPage(){
-    const {id} = useParams();
-    const currentsurveyresponse = useSelector((state)=> state.surveyresponses.surveyresponses.find((surveyresponse) => surveyresponse.id == parseInt(id)))
-    const branch_id =  useSelector(state=>state.branches.branch_id);
-    
+export  default function FinishPage({clearForm}){
+    const {form_id,branch_id} = useParams();
+
+    const clickHandler = ()=>{
+        clearForm()
+    }
     return (
         <>
             <div className="container csform-container">
@@ -14,7 +15,8 @@ export  default function FinishPage(){
                             <h2 className="mb-2">Responses For Customer Survey Form</h2>
                             <p className="my-4">Your response has been recorded</p>
 
-                            <Link to={`/surveyresponses/${branch_id}/start`} className="text-decoration-underline py-4">Submit another response</Link>
+                            {/* <Link to={`/surveyresponses/${form_id}/${branch_id}/create`} className="text-decoration-underline py-4">Submit another response</Link> */}
+                            <Link className="text-decoration-underline py-4" onClick={clickHandler}>Submit another response</Link>
                         </div>
                 </form>
             </div>
