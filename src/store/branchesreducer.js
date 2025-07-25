@@ -36,6 +36,7 @@ export const branchesSlice = createSlice({
 				state.error = null;
 
 				state.branches = action.payload;
+        // console.log(action.payload)
 			})
 			.addCase(fetchbranches.rejected,(state,action)=>{
 				state.loading = false;

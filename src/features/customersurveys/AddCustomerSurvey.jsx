@@ -14,7 +14,6 @@ import FinishPage from "./FinishPage.jsx";
 export default function AddCustomerSurvey() {
 	
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
 	
 	const {form_id,branch_id} = useParams();
 
@@ -42,7 +41,7 @@ export default function AddCustomerSurvey() {
 			});
 
 			setQuestionAnswers(initialAnswers);
-			console.log(questionAnswers);
+			// console.log(questionAnswers);
 		});
 	}
 
@@ -50,6 +49,7 @@ export default function AddCustomerSurvey() {
 		initQuestionAnswers();
 	}, []);
 	useEffect(() => {
+		dispatch(fetchbranches())
 		dispatch(setcurrentbranch(branch_id))
 	}, []);
 
