@@ -29,6 +29,16 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
             />
           )}
 
+          {q.type === "date" && (
+            <input
+              type="date"
+              className="form-control underline-only"
+              name={q.id}
+              value={answers[q.id] || ""}
+              onChange={(e) => onAnswerChange(q.id, e.target.value)}
+            />
+          )}
+
           {q.type === "textarea" && (
             <textarea
               className="form-control"
