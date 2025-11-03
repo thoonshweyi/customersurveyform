@@ -30,6 +30,7 @@ export default function AddCustomerSurvey() {
 	const initQuestionAnswers = ()=>{
 		axios.get(`${APP_CONFIG.backendURL}/api/forms/${form_id}`).then(res => {
 			const fetched = res.data;
+			console.log(fetched);
 			setForm(fetched); //
 
 			// Initialize answers for all questions
@@ -86,7 +87,7 @@ export default function AddCustomerSurvey() {
 				if (!a || a === "") {
 					fieldErrors.required = "This question is required.";
 				}
-				let phoneq = q.name.toLowerCase() == 'phone';
+				let phoneq = q.name.toLowerCase() == 'phone' || q.en_name?.toLowerCase() == 'phone';
 				if(phoneq){
 					let validphone = isMyanmarPhoneNumber(a);
 					if (!validphone) {
@@ -123,7 +124,7 @@ export default function AddCustomerSurvey() {
 						fieldErrors.required = "This question is required.";
 					}
 					console.log(fieldErrors.required);
-					let phoneq = q.name.toLowerCase() == 'phone';
+					let phoneq = q.name.toLowerCase() == 'phone' || q.en_name?.toLowerCase() == 'phone';
 					if(phoneq){
 						let validphone = isMyanmarPhoneNumber(a);
 						if (!validphone) {
