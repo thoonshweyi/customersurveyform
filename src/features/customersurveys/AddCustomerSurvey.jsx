@@ -9,6 +9,7 @@ import { fetchbranches,setcurrentbranch } from './../../store/branchesreducer'
 import { APP_CONFIG } from './../../config/constant.js';
 import StartPage from "./StartPage.jsx";
 import FinishPage from "./FinishPage.jsx";
+import FullPageLoader from "../../components/FullPageLoader.jsx";
 
 
 export default function AddCustomerSurvey() {
@@ -25,25 +26,33 @@ export default function AddCustomerSurvey() {
 	const [step, setStep] = useState(-1);
 	const [errors, setErrors] = useState({});
  	const loading = useSelector(state=>state.surveyresponses.loading);
+	const [forceLoading, setForceLoading] = useState(true); 
 
 	
-	const initQuestionAnswers = ()=>{
-		axios.get(`${APP_CONFIG.backendURL}/api/forms/${form_id}`).then(res => {
-			const fetched = res.data;
-			console.log(fetched);
-			setForm(fetched); //
+	const initQuestionAnswers = async ()=>{
+		setForceLoading(true);
+		try {
+			await axios.get(`${APP_CONFIG.backendURL}/api/forms/${form_id}`).then(res => {
+				const fetched = res.data;
+				console.log(fetched);
+				setForm(fetched); //
 
-			// Initialize answers for all questions
-			const initialAnswers = {};
-			fetched.sections.forEach(section => {
-				section.questions.forEach(q => {
-					initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+				// Initialize answers for all questions
+				const initialAnswers = {};
+				fetched.sections.forEach(section => {
+					section.questions.forEach(q => {
+						initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+					});
 				});
-			});
 
-			setQuestionAnswers(initialAnswers);
-			// console.log(questionAnswers);
-		});
+				setQuestionAnswers(initialAnswers);
+				// console.log(questionAnswers);
+			});
+		} catch (error) {
+   			console.error('Fetch form error:', error);
+		}finally{
+			setForceLoading(false);
+		}
 	}
 
 	useEffect(() => {
@@ -196,9 +205,13 @@ export default function AddCustomerSurvey() {
 		dispatch({type:"LOADING_START"})
 	}
 
+	if(forceLoading){
+		return <FullPageLoader />;
+	}
 
 	if (step === -1) {
-		return <StartPage  nextStep={nextStep}/>;
+		// console.log(form);
+		return <StartPage nextStep={nextStep}/>;
 	}
 	else if(step >= 0){
 		return (
