@@ -10,11 +10,12 @@ import { APP_CONFIG } from './../../config/constant.js';
 import StartPage from "./StartPage.jsx";
 import FinishPage from "./FinishPage.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
-
+import {fetchFormContents,setFilters,clearFilters,clearError} from "../../store/formSlice";
 
 export default function AddCustomerSurvey() {
 	
 	const dispatch = useDispatch();
+	const {datas,contents,loading: formLoading,error,bookings,bookingLoading,bookingError,filters} = useSelector((state)=>state.forms)
 	
 	const {form_id,branch_id} = useParams();
 
@@ -27,14 +28,23 @@ export default function AddCustomerSurvey() {
 	const [errors, setErrors] = useState({});
  	const loading = useSelector(state=>state.surveyresponses.loading);
 	const [forceLoading, setForceLoading] = useState(true); 
-
 	
+
+	const [files, setFiles] = useState(null);
+	const filesHandler = (e)=>{
+		const file = e.target.files[0];
+
+		if(file){
+			setFiles(file);
+		}
+	}
+
 	const initQuestionAnswers = async ()=>{
 		setForceLoading(true);
 		try {
 			await axios.get(`${APP_CONFIG.backendURL}/api/forms/${form_id}`).then(res => {
 				const fetched = res.data;
-				console.log(fetched);
+				// console.log(fetched);
 				setForm(fetched); //
 
 				// Initialize answers for all questions
@@ -47,7 +57,11 @@ export default function AddCustomerSurvey() {
 
 				setQuestionAnswers(initialAnswers);
 				// console.log(questionAnswers);
+
 			});
+			
+			await dispatch(fetchFormContents());
+
 		} catch (error) {
    			console.error('Fetch form error:', error);
 		}finally{
@@ -67,7 +81,7 @@ export default function AddCustomerSurvey() {
 	const currentQuestions = currentSection.questions || [];
 
 	const handleAnswerChange = (qId, value, isMulti = false) => {
-		// console.log(questionAnswers);
+		console.log(questionAnswers);
 		setQuestionAnswers(prev => {
 		if (isMulti) {
 			const updated = prev[qId].includes(value)
@@ -122,14 +136,15 @@ export default function AddCustomerSurvey() {
 			s.questions.forEach(q => {
 				const a = questionAnswers[q.id];
 				const fieldErrors = {};
+				// console.log(q);
 				
 
 				if (q.type === "checkbox") {
-					if (!a || a.length === 0) {
+					if ((!a || a.length === 0) && q.required) {
 						fieldErrors.required = "Please select at least one option.";
 					}
 				} else {
-					if (!a || a === "") {
+					if ((!a || a === "") && q.required) {
 						fieldErrors.required = "This question is required.";
 					}
 					console.log(fieldErrors.required);
@@ -184,6 +199,7 @@ export default function AddCustomerSurvey() {
 		questionanswers: questionAnswers 
 	};
 	console.log(data);
+	console.log(files);
 	try{
 		const {surveyresponse} = await dispatch(addsurveyresponse(data)).unwrap();
 		let id = surveyresponse.id
@@ -211,7 +227,7 @@ export default function AddCustomerSurvey() {
 
 	if (step === -1) {
 		// console.log(form);
-		return <StartPage nextStep={nextStep}/>;
+		return <StartPage nextStep={nextStep} content={contents[form.id]}/>;
 	}
 	else if(step >= 0){
 		return (
@@ -248,6 +264,7 @@ export default function AddCustomerSurvey() {
 							answers={questionAnswers}
 							onAnswerChange={handleAnswerChange}
 							errors={errors}
+							filesHandler={filesHandler}
 							/>
 						</div>
 					)}

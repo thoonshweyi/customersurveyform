@@ -10,7 +10,9 @@ const BASEURL = `${APP_CONFIG.backendURL}/api/surveyresponses/`;
 export const addsurveyresponse = createAsyncThunk('data/addsurveyresponse',async(obj,{fulfillWithValue,rejectWithValue})=>{
      let res;
      try{
-          res = await axios.post(BASEURL,obj);
+          res = await axios.post(BASEURL,obj,{
+               headers: {"Content-Type":"multipart/form-data"}
+          });
           // console.log(obj);
           console.log(res);
         //   return fulfillWithValue(res.data);

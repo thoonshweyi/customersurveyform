@@ -4,7 +4,8 @@ import {Link} from "react-router-dom"
 import {useNavigate,useParams} from "react-router"
 import {useSelector} from "react-redux";
 import { fetchbranches,setcurrentbranch } from './../../store/branchesreducer'
-export default function StartPage({ nextStep }){
+export default function StartPage({ nextStep, content={}}){
+    // console.log(content);
 	const navigate = useNavigate();
     
 	const {branch_id} = useParams();
@@ -25,6 +26,29 @@ export default function StartPage({ nextStep }){
             }
         }
     }, [branches]);
+
+    if (content && Object.keys(content).length > 0) {
+        return (
+            <div className="container d-flex justify-content-center align-items-center min-vh-100">
+                <div className="card card-custom p-5 text-center animate__animated animate__fadeInDown">
+                    {/* <img src="https://cdn-icons-png.flaticon.com/512/1670/1670047.png" alt="Survey" className="mx-auto mb-4" style={{width: "80px"}} /> */}
+                    <img src={pro1globallogo} alt="pro1globallogo" className="mx-auto mb-4" style={{width: "180px"}} />
+                    <h1 className="mb-3 text-primary">{content.display_title}
+                    </h1>
+                    <p className="text-secondary mb-4">
+                        {content.slogan}
+                    </p>
+                    
+                    <button className="btn btn-custom px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite" onClick={nextStep}>
+                        {content.action}
+                    </button>
+                    <div className="text-muted mt-4 small">
+                        {content.privacy_note}
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="container d-flex justify-content-center align-items-center min-vh-100">

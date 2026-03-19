@@ -1,14 +1,16 @@
-export default function QuestionsPage({ questions, answers, onAnswerChange, errors = {} }) {
+import React,{useState,useEffect} from "react";
+export default function QuestionsPage({ questions, answers, onAnswerChange, errors = {}, filesHandler}) {
 
 	const isChecked = (q,opt)=>
               q.type === "checkbox"
                 ? answers[q.id]?.includes(opt.id)
                 : answers[q.id] === opt.id;
+  const [filePreviews,setFilePreviews] = useState({});
   return (
     <>
       {questions.map((q) => (
         <div key={q.id} className="csform-card mb-4">
-          <label className="form-label">{q.name} <span className="text-danger">*</span></label>
+          <label className="form-label">{q.name} {q.required && <span className="text-danger">*</span>}</label>
 
           {errors[q.id] && (
             <div className="text-danger small mb-1">
@@ -114,6 +116,40 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
                 );
               })}
             </div>
+          )}
+
+          {q.type === "file" && (
+            <>
+            <input
+              type="file"
+              className="form-control underline-only"
+              name={q.id}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                filesHandler(e);
+
+                if (file) {
+                  const previewUrl = URL.createObjectURL(file);
+
+                  setFilePreviews((prev) => ({
+                    ...prev,
+                    [q.id]: previewUrl
+                  }));
+                }
+              }}
+            />
+            {filePreviews[q.id] && (
+              <div>
+                {/* <p className="mb-1">Preview:</p> */}
+                <img
+                  src={filePreviews[q.id]}
+                  className="img-fluid rounded border"
+                  alt="bank slip preview"
+                  style={{ maxHeight: "250px", objectFit: "contain" }}
+                />
+              </div>
+            )}
+            </>
           )}
         </div>
       ))}
