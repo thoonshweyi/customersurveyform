@@ -126,7 +126,7 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
               name={q.id}
               onChange={(e) => {
                 const file = e.target.files[0];
-                filesHandler(e);
+                filesHandler(e,q.id);
 
                 if (file) {
                   const previewUrl = URL.createObjectURL(file);

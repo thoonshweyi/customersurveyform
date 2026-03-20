@@ -31,11 +31,14 @@ export default function AddCustomerSurvey() {
 	
 
 	const [files, setFiles] = useState(null);
-	const filesHandler = (e)=>{
+	const filesHandler = (e,qId)=>{
 		const file = e.target.files[0];
 
 		if(file){
-			setFiles(file);
+			setFiles((prev)=>({
+				...prev,
+				[qId]: file
+			}));
 		}
 	}
 
@@ -198,10 +201,26 @@ export default function AddCustomerSurvey() {
 		branch_id: branch_id,
 		questionanswers: questionAnswers 
 	};
-	console.log(data);
-	console.log(files);
+	// console.log(data);
+	// console.log(files);
+
+
+
+	const formData = new FormData();
+	formData.append("form_id", form_id);
+	formData.append("branch_id", branch_id);
+	// formData.append("questionanswers", questionAnswers);
+	// formData.append("questionfiles", files);
+
+	Object.keys(questionAnswers).forEach((key) => {
+		formData.append(`questionanswers[${key}]`, questionAnswers[key]);
+	});
+	Object.keys(files).forEach((key) => {
+		formData.append(`questionfiles[${key}]`, files[key]);
+	});
+
 	try{
-		const {surveyresponse} = await dispatch(addsurveyresponse(data)).unwrap();
+		const {surveyresponse} = await dispatch(addsurveyresponse(formData)).unwrap();
 		let id = surveyresponse.id
 		// navigate(`/surveyresponses/${form_id}/finish`);
 		setStep(prev => "F");
