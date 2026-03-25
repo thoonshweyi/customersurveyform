@@ -80,6 +80,7 @@ export default function AddCustomerSurvey() {
 		dispatch(setcurrentbranch(branch_id))
 	}, []);
 
+
 	const currentSection = form.sections[step] || {};
 	const currentQuestions = currentSection.questions || [];
 
@@ -240,6 +241,37 @@ export default function AddCustomerSurvey() {
 		dispatch({type:"LOADING_START"})
 	}
 
+
+	// Start Form Feature
+		// => Easy Apply // Upload & Go
+		const filterByQuestionId = (questionIds) => {
+			const ids = Array.isArray(questionIds) ? questionIds : [questionIds];
+
+			const newForm = {
+				...form,
+				sections: form.sections
+				.map(section => ({
+					...section,
+					questions: section.questions.filter(q => ids.includes(q.id))
+				}))
+				.filter(section => section.questions.length > 0) // remove empty sections
+			}
+
+			setForm(newForm);
+			
+			
+			const initialAnswers = {};
+			newForm.sections.forEach(section => {
+				section.questions.forEach(q => {
+					initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+				});
+			});
+
+			setQuestionAnswers(initialAnswers);
+		}
+
+	// End Form Feature
+
 	if(forceLoading){
 		return <FullPageLoader />;
 	}
@@ -258,7 +290,8 @@ export default function AddCustomerSurvey() {
 					</div>
 
 					<div className="required-text">
-					* Indicates required question
+					* Indicates required question 
+					{/* <button type="button" className="btn btn-primary" onClick={()=>filterByQuestionId(54)}>Apply</button> */}
 					</div>
 
 				
