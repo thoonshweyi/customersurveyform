@@ -31,7 +31,7 @@ export default function AddCustomerSurvey() {
 	const [forceLoading, setForceLoading] = useState(true); 
 	
 
-	const [files, setFiles] = useState(null);
+	const [files, setFiles] = useState({});
 	const filesHandler = (e,qId)=>{
 		const file = e.target.files[0];
 
@@ -39,7 +39,7 @@ export default function AddCustomerSurvey() {
 			setFiles((prev)=>({
 				...prev,
 				[qId]: file
-			}));
+			})); 
 		}
 	}
 
@@ -243,10 +243,24 @@ export default function AddCustomerSurvey() {
 		dispatch({type:"LOADING_START"})
 	}
 
-	
+	const getQuestionIdsByName = (names = []) => {
+	return form.sections
+		.flatMap(section => section.questions)
+		.filter(q => names.includes(q.name) || names.includes(q.en_name))
+		.map(q => q.id);
+	};
 	// Start Form Feature
 	const featureLogic = {
-		easyApply : (questionIds) => {
+		easyApply : () => {
+	
+			console.log(form.id);
+			let questionIds = [];
+			if(form.id == FORM_IDS.PRO1_GLOBAL_CV_FORM){
+				const questionNames = ['Attach CV','Name','Phone'];
+				questionIds = getQuestionIdsByName(questionNames);
+			}
+
+			// questionIds
 			const ids = Array.isArray(questionIds) ? questionIds : [questionIds];
 		
 			const newForm = {
@@ -255,6 +269,10 @@ export default function AddCustomerSurvey() {
 				.map(section => ({
 					...section,
 					questions: section.questions.filter(q => ids.includes(q.id))
+								// .map(q => ({
+								// 	...q,
+								// 	required: true
+								// }))
 				}))
 				.filter(section => section.questions.length > 0) // remove empty sections
 			}
@@ -282,13 +300,13 @@ export default function AddCustomerSurvey() {
 	const featuresBindingsByForm = Object.fromEntries(
 		(features?.[form.id] || []).map((feature) => [
 			feature.name,
-			() => featureLogic[feature.name]?.(54) // pass form, not magic number
+			() => featureLogic[feature.name]?.() // pass form, not magic number
 		])
 	);
 	console.log(featuresBindingsByForm);
 
 	// End Form Feature
-
+	
 
 
 

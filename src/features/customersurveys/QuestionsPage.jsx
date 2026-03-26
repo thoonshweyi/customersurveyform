@@ -144,7 +144,7 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
                 <img
                   src={filePreviews[q.id]}
                   className="img-fluid rounded border"
-                  alt="bank slip preview"
+                  alt={q.name}
                   style={{ maxHeight: "250px", objectFit: "contain" }}
                 />
               </div>
