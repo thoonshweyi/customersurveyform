@@ -10,13 +10,14 @@ import { APP_CONFIG } from './../../config/constant.js';
 import StartPage from "./StartPage.jsx";
 import FinishPage from "./FinishPage.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
-import {fetchFormContents,setFilters,clearFilters,clearError} from "../../store/formSlice";
+import {fetchFormContents,setFilters,clearFilters,clearError, fetchFormFeatures,FORM_IDS} from "../../store/formSlice";
 
 export default function AddCustomerSurvey() {
 	
 	const dispatch = useDispatch();
-	const {datas,contents,loading: formLoading,error,bookings,bookingLoading,bookingError,filters} = useSelector((state)=>state.forms)
-	
+	const {datas,contents,features,loading: formLoading,error,bookings,bookingLoading,bookingError,filters} = useSelector((state)=>state.forms)
+	// console.log(contents,features);
+
 	const {form_id,branch_id} = useParams();
 
 	// console.log(branch_id)
@@ -64,6 +65,7 @@ export default function AddCustomerSurvey() {
 			});
 			
 			await dispatch(fetchFormContents());
+			await dispatch(fetchFormFeatures());
 
 		} catch (error) {
    			console.error('Fetch form error:', error);
@@ -241,12 +243,12 @@ export default function AddCustomerSurvey() {
 		dispatch({type:"LOADING_START"})
 	}
 
-
+	
 	// Start Form Feature
-		// => Easy Apply // Upload & Go
-		const filterByQuestionId = (questionIds) => {
+	const featureLogic = {
+		easyApply : (questionIds) => {
 			const ids = Array.isArray(questionIds) ? questionIds : [questionIds];
-
+		
 			const newForm = {
 				...form,
 				sections: form.sections
@@ -256,7 +258,7 @@ export default function AddCustomerSurvey() {
 				}))
 				.filter(section => section.questions.length > 0) // remove empty sections
 			}
-
+		
 			setForm(newForm);
 			
 			
@@ -266,11 +268,29 @@ export default function AddCustomerSurvey() {
 					initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
 				});
 			});
-
+		
 			setQuestionAnswers(initialAnswers);
+		},
+
+		uploadCV: (form) => {
+			console.log('Upload CV for form', form.id);
 		}
+		// ... can extend function later
+	};
+
+
+	const featuresBindingsByForm = Object.fromEntries(
+		(features?.[form.id] || []).map((feature) => [
+			feature.name,
+			() => featureLogic[feature.name]?.(54) // pass form, not magic number
+		])
+	);
+	console.log(featuresBindingsByForm);
 
 	// End Form Feature
+
+
+
 
 	if(forceLoading){
 		return <FullPageLoader />;
@@ -278,7 +298,7 @@ export default function AddCustomerSurvey() {
 
 	if (step === -1) {
 		// console.log(form);
-		return <StartPage nextStep={nextStep} content={contents[form.id]}/>;
+		return <StartPage nextStep={nextStep} content={contents[form.id]} feature={features[form.id]} handlers={featuresBindingsByForm}/>;
 	}
 	else if(step >= 0){
 		return (
@@ -291,7 +311,7 @@ export default function AddCustomerSurvey() {
 
 					<div className="required-text">
 					* Indicates required question 
-					{/* <button type="button" className="btn btn-primary" onClick={()=>filterByQuestionId(54)}>Apply</button> */}
+					{/* <button type="button" className="btn btn-primary" onClick={()=>easyApply(54)}>Apply</button> */}
 					</div>
 
 				

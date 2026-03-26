@@ -4,8 +4,8 @@ import {Link} from "react-router-dom"
 import {useNavigate,useParams} from "react-router"
 import {useSelector} from "react-redux";
 import { fetchbranches,setcurrentbranch } from './../../store/branchesreducer'
-export default function StartPage({ nextStep, content={}}){
-    // console.log(content);
+export default function StartPage({ nextStep, content={}, feature=[], handlers={}}){
+    console.log(handlers);
 	const navigate = useNavigate();
     
 	const {branch_id} = useParams();
@@ -39,9 +39,28 @@ export default function StartPage({ nextStep, content={}}){
                         {content.slogan}
                     </p>
                     
-                    <button className="btn btn-custom px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite" onClick={nextStep}>
-                        {content.action}
-                    </button>
+                    <div className="d-flex flex-column flex-lg-row gap-2">
+                        <button
+                            className="btn btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
+                            onClick={nextStep}
+                        >
+                            {content.action}
+                        </button>
+
+                        {feature.map((f) => (
+                            <button
+                                key={f.name}
+                                className="btn bg-danger btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
+                                onClick={(e) => {
+                                    nextStep(e);
+                                    handlers[f.name]?.();
+                                }}
+                            >
+                                {f.action}
+                            </button>
+                        ))}
+                    </div>
+
                     <div className="text-muted mt-4 small">
                         {content.privacy_note}
                     </div>
