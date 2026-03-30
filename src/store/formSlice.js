@@ -17,10 +17,11 @@ const formContents = {
      }
 };
 
-const formFeatures = {
+export const formFeatures = {
      [FORM_IDS.PRO1_GLOBAL_CV_FORM]: [{
           name: 'easyApply',
-          action: 'Attach CV'
+          action: 'Attach CV',
+          questionNames: ['Attach CV']
      }]
 };
 

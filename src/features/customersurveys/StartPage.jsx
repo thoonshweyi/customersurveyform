@@ -4,7 +4,7 @@ import {Link} from "react-router-dom"
 import {useNavigate,useParams} from "react-router"
 import {useSelector} from "react-redux";
 import { fetchbranches,setcurrentbranch } from './../../store/branchesreducer'
-export default function StartPage({ nextStep, content={}, feature=[], handlers={}}){
+export default function StartPage({ nextStep, content={}, feature=[], featureHandlers={}}){
     // console.log(handlers);
 	const navigate = useNavigate();
     
@@ -52,8 +52,8 @@ export default function StartPage({ nextStep, content={}, feature=[], handlers={
                                 key={f.name}
                                 className="btn bg-danger btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
                                 onClick={(e) => {
+                                    featureHandlers[f.name]?.();
                                     nextStep(e);
-                                    handlers[f.name]?.();
                                 }}
                             >
                                 {f.action}

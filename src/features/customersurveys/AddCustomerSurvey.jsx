@@ -11,6 +11,7 @@ import StartPage from "./StartPage.jsx";
 import FinishPage from "./FinishPage.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 import {fetchFormContents,setFilters,clearFilters,clearError, fetchFormFeatures,FORM_IDS} from "../../store/formSlice";
+import { createFormFeatureHandlers } from "./../../assets/js/formFeatures.js";
 
 export default function AddCustomerSurvey() {
 	
@@ -106,13 +107,18 @@ export default function AddCustomerSurvey() {
 		const newErrors = {};
 		currentQuestions.forEach(q => {
 			const a = questionAnswers[q.id];
+			const f = files?.[q.id];
 			const fieldErrors = {};
 
 			if (q.type === "checkbox") {
 				if (!a || a.length === 0) {
 					fieldErrors.required = "Please select at least one option.";
 				}
-			} else {
+			}else if (q.type === "file") {
+				if ((!f || (Array.isArray(f) && f.length === 0)) && q.required) {
+					fieldErrors.required = "Please upload a file.";
+				}
+			}else {
 				if (!a || a === "") {
 					fieldErrors.required = "This question is required.";
 				}
@@ -143,7 +149,7 @@ export default function AddCustomerSurvey() {
 				const a = questionAnswers[q.id];
 				const f = files?.[q.id];
 				const fieldErrors = {};
-				console.log(f);
+				// console.log(f);
 				
 
 				if (q.type === "checkbox") {
@@ -159,7 +165,7 @@ export default function AddCustomerSurvey() {
 					if ((!a || a === "") && q.required) {
 						fieldErrors.required = "This question is required.";
 					}
-					console.log(fieldErrors.required);
+					// console.log(fieldErrors.required);
 					let phoneq = q.name.toLowerCase() == 'phone' || q.en_name?.toLowerCase() == 'phone';
 					if(phoneq){
 						let validphone = isMyanmarPhoneNumber(a);
@@ -249,71 +255,16 @@ export default function AddCustomerSurvey() {
 		dispatch({type:"LOADING_START"})
 	}
 
-	const getQuestionIdsByName = (names = []) => {
-	return form.sections
-		.flatMap(section => section.questions)
-		.filter(q => names.includes(q.name) || names.includes(q.en_name))
-		.map(q => q.id);
-	};
-	// Start Form Feature
-	const featureLogic = {
-		easyApply : () => {
-	
-			console.log(form.id);
-			let questionIds = [];
-			if(form.id == FORM_IDS.PRO1_GLOBAL_CV_FORM){
-				const questionNames = ['Attach CV','Name','Phone'];
-				questionIds = getQuestionIdsByName(questionNames);
-			}
 
-			// questionIds
-			const ids = Array.isArray(questionIds) ? questionIds : [questionIds];
-		
-			const newForm = {
-				...form,
-				sections: form.sections
-				.map(section => ({
-					...section,
-					questions: section.questions.filter(q => ids.includes(q.id))
-								.map(q => ({
-									...q,
-									required: true
-								}))
-				}))
-				.filter(section => section.questions.length > 0) // remove empty sections
-			}
-		
-			setForm(newForm);
-			
-			
-			const initialAnswers = {};
-			newForm.sections.forEach(section => {
-				section.questions.forEach(q => {
-					initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
-				});
-			});
-		
-			setQuestionAnswers(initialAnswers);
-		},
-
-		uploadCV: (form) => {
-			console.log('Upload CV for form', form.id);
-		}
-		// ... can extend function later
-	};
-
-
-	const featuresBindingsByForm = Object.fromEntries(
-		(features?.[form.id] || []).map((feature) => [
-			feature.name,
-			() => featureLogic[feature.name]?.() // pass form, not magic number
-		])
-	);
+	// Start Register Form Feature
+	const featureHandlers = createFormFeatureHandlers({
+		form,
+		setForm,
+		questionAnswers,
+		setQuestionAnswers
+	});
 	// console.log(featuresBindingsByForm);
-
-	// End Form Feature
-	
-
+	// End Register Form Feature
 
 
 	if(forceLoading){
@@ -322,7 +273,7 @@ export default function AddCustomerSurvey() {
 
 	if (step === -1) {
 		// console.log(form);
-		return <StartPage nextStep={nextStep} content={contents[form.id]} feature={features[form.id]} handlers={featuresBindingsByForm}/>;
+		return <StartPage nextStep={nextStep} content={contents[form.id]} feature={features[form.id]} featureHandlers={featureHandlers}/>;
 	}
 	else if(step >= 0){
 		return (
