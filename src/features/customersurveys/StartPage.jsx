@@ -5,7 +5,7 @@ import {useNavigate,useParams} from "react-router"
 import {useSelector} from "react-redux";
 import { fetchbranches,setcurrentbranch } from './../../store/branchesreducer'
 export default function StartPage({ nextStep, content={}, feature=[], handlers={}}){
-    console.log(handlers);
+    // console.log(handlers);
 	const navigate = useNavigate();
     
 	const {branch_id} = useParams();

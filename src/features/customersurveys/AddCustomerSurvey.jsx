@@ -31,7 +31,7 @@ export default function AddCustomerSurvey() {
 	const [forceLoading, setForceLoading] = useState(true); 
 	
 
-	const [files, setFiles] = useState({});
+	const [files, setFiles] = useState([]);
 	const filesHandler = (e,qId)=>{
 		const file = e.target.files[0];
 
@@ -141,15 +141,21 @@ export default function AddCustomerSurvey() {
 		form.sections.forEach(s=>{
 			s.questions.forEach(q => {
 				const a = questionAnswers[q.id];
+				const f = files?.[q.id];
 				const fieldErrors = {};
-				// console.log(q);
+				console.log(f);
 				
 
 				if (q.type === "checkbox") {
 					if ((!a || a.length === 0) && q.required) {
 						fieldErrors.required = "Please select at least one option.";
 					}
-				} else {
+				}else if (q.type === "file") {
+					if ((!f || (Array.isArray(f) && f.length === 0)) && q.required) {
+						fieldErrors.required = "Please upload a file.";
+					}
+				}
+				else {
 					if ((!a || a === "") && q.required) {
 						fieldErrors.required = "This question is required.";
 					}
@@ -269,10 +275,10 @@ export default function AddCustomerSurvey() {
 				.map(section => ({
 					...section,
 					questions: section.questions.filter(q => ids.includes(q.id))
-								// .map(q => ({
-								// 	...q,
-								// 	required: true
-								// }))
+								.map(q => ({
+									...q,
+									required: true
+								}))
 				}))
 				.filter(section => section.questions.length > 0) // remove empty sections
 			}
@@ -303,7 +309,7 @@ export default function AddCustomerSurvey() {
 			() => featureLogic[feature.name]?.() // pass form, not magic number
 		])
 	);
-	console.log(featuresBindingsByForm);
+	// console.log(featuresBindingsByForm);
 
 	// End Form Feature
 	
