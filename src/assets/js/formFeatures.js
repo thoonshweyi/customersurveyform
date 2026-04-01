@@ -7,6 +7,18 @@ const getQuestionIdsByName = (form, names = []) => {
         .map(q => q.id);
 };
 
+export const getEasyQuestionIds = (form) => {
+    const featureConfig = formFeatures[form.id]?.find(
+        f => f.name === "easyApply"
+    );
+
+    const questionNames = [
+        ...(featureConfig?.questionNames || []),
+    ];
+
+    return getQuestionIdsByName(form, questionNames);
+};
+
 //  Factory function
 export const createFormFeatureHandlers = ({ form, setForm, questionAnswers, setQuestionAnswers }) => {
 

@@ -11,7 +11,7 @@ import StartPage from "./StartPage.jsx";
 import FinishPage from "./FinishPage.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 import {fetchFormContents,setFilters,clearFilters,clearError, fetchFormFeatures,FORM_IDS} from "../../store/formSlice";
-import { createFormFeatureHandlers } from "./../../assets/js/formFeatures.js";
+import { createFormFeatureHandlers,getEasyQuestionIds } from "./../../assets/js/formFeatures.js";
 
 export default function AddCustomerSurvey() {
 	
@@ -86,6 +86,14 @@ export default function AddCustomerSurvey() {
 
 	const currentSection = form.sections[step] || {};
 	const currentQuestions = currentSection.questions || [];
+	const easyIds = getEasyQuestionIds(form);
+	// const currentQuestions = (currentSection.questions || []).filter(q => {
+	// 	// if (applyMode === "easy") {
+	// 	// 	return easyIds.includes(q.id); // only easy
+	// 	// }
+	// 	return !easyIds.includes(q.id); // full = exclude easy
+	// });
+	console.log(currentQuestions);
 
 	const handleAnswerChange = (qId, value, isMulti = false) => {
 		console.log(questionAnswers);
