@@ -10,14 +10,14 @@ import { APP_CONFIG } from './../../config/constant.js';
 import StartPage from "./StartPage.jsx";
 import FinishPage from "./FinishPage.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
-import {fetchFormContents,setFilters,clearFilters,clearError, fetchFormFeatures,FORM_IDS} from "../../store/formSlice";
+import {fetchFormContents,setFilters,clearFilters,clearError, fetchFormFeatures,FORM_IDS, fetchFormSettings} from "../../store/formSlice";
 import { createFormFeatureHandlers,getEasyQuestionIds } from "./../../assets/js/formFeatures.js";
 
 export default function AddCustomerSurvey() {
 	
 	const dispatch = useDispatch();
-	const {datas,contents,features,loading: formLoading,error,bookings,bookingLoading,bookingError,filters} = useSelector((state)=>state.forms)
-	// console.log(contents,features);
+	const {datas,contents,features,settings,loading: formLoading,error,filters} = useSelector((state)=>state.forms)
+	// console.log(contents,features,settings);
 
 	const {form_id,branch_id} = useParams();
 
@@ -67,6 +67,7 @@ export default function AddCustomerSurvey() {
 			
 			await dispatch(fetchFormContents());
 			await dispatch(fetchFormFeatures());
+			await dispatch(fetchFormSettings());
 
 		} catch (error) {
    			console.error('Fetch form error:', error);
@@ -85,15 +86,8 @@ export default function AddCustomerSurvey() {
 
 
 	const currentSection = form.sections[step] || {};
-	const currentQuestions = currentSection.questions || [];
-	const easyIds = getEasyQuestionIds(form);
-	// const currentQuestions = (currentSection.questions || []).filter(q => {
-	// 	// if (applyMode === "easy") {
-	// 	// 	return easyIds.includes(q.id); // only easy
-	// 	// }
-	// 	return !easyIds.includes(q.id); // full = exclude easy
-	// });
-	console.log(currentQuestions);
+	let currentQuestions = currentSection.questions || [];
+
 
 	const handleAnswerChange = (qId, value, isMulti = false) => {
 		console.log(questionAnswers);
@@ -265,13 +259,25 @@ export default function AddCustomerSurvey() {
 
 
 	// Start Register Form Feature
-	const featureHandlers = createFormFeatureHandlers({
+	let featureHandlers = createFormFeatureHandlers({
 		form,
 		setForm,
 		questionAnswers,
 		setQuestionAnswers
 	});
-	// console.log(featuresBindingsByForm);
+	featureHandlers = {
+		...featureHandlers,
+		nextStep
+	}
+	
+	const currentSetting = settings[form.id] || {};
+	const mode = currentSetting.applyMode || "full";
+	const easyIds = getEasyQuestionIds(form);
+
+	currentQuestions = (currentSection.questions || []).filter(q => {
+		if (mode === "easy") return true;
+		return !easyIds.includes(q.id);
+	});
 	// End Register Form Feature
 
 
@@ -281,7 +287,7 @@ export default function AddCustomerSurvey() {
 
 	if (step === -1) {
 		// console.log(form);
-		return <StartPage nextStep={nextStep} content={contents[form.id]} feature={features[form.id]} featureHandlers={featureHandlers}/>;
+		return <StartPage form={form} content={contents[form.id]} feature={features[form.id]} featureHandlers={featureHandlers}/>;
 	}
 	else if(step >= 0){
 		return (

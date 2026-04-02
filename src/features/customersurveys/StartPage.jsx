@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import {useDispatch,useSelector} from "react-redux"
 import pro1globallogo from "./../../assets/icons/pro1globallogo.png"
 import {Link} from "react-router-dom"
 import {useNavigate,useParams} from "react-router"
-import {useSelector} from "react-redux";
-import { fetchbranches,setcurrentbranch } from './../../store/branchesreducer'
-export default function StartPage({ nextStep, content={}, feature=[], featureHandlers={}}){
-    // console.log(handlers);
+import { setFormSetting } from "../../store/formSlice";
+export default function StartPage({ form ={}, content={}, feature=[], featureHandlers={}}){
+    console.log(featureHandlers);
 	const navigate = useNavigate();
+    const dispatch = useDispatch();
     
 	const {branch_id} = useParams();
 
@@ -27,6 +28,10 @@ export default function StartPage({ nextStep, content={}, feature=[], featureHan
         }
     }, [branches]);
 
+    // useEffect(()=>{
+    //     dispatch(setFilters());
+    // },[dispatch]);
+
     if (content && Object.keys(content).length > 0) {
         return (
             <div className="container d-flex justify-content-center align-items-center min-vh-100">
@@ -42,7 +47,9 @@ export default function StartPage({ nextStep, content={}, feature=[], featureHan
                     <div className="d-flex flex-column flex-lg-row gap-2">
                         <button
                             className="btn btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
-                            onClick={nextStep}
+                            onClick={(e)=>{
+                                featureHandlers['nextStep'](e)
+                            }}
                         >
                             {content.action}
                         </button>
@@ -53,7 +60,15 @@ export default function StartPage({ nextStep, content={}, feature=[], featureHan
                                 className="btn bg-danger btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
                                 onClick={(e) => {
                                     featureHandlers[f.name]?.();
-                                    nextStep(e);
+                                    featureHandlers['nextStep'](e)
+
+                                    dispatch(setFormSetting({
+                                        formId: form.id,
+                                        data: {
+                                            applyMode: "easy",
+                                            activeFeature: f.name
+                                        }
+                                    }));
                                 }}
                             >
                                 {f.action}
@@ -80,7 +95,9 @@ export default function StartPage({ nextStep, content={}, feature=[], featureHan
                     We care about your experience! This short survey will take only a few minutes and helps us serve you better.
                 </p>
                 
-                <button className="btn btn-custom px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite" onClick={nextStep}>
+                <button className="btn btn-custom px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite" onClick={(e)=>{
+                    featureHandlers['nextStep'](e)
+                }}>
                     Start Survey
                 </button>
                 <div className="text-muted mt-4 small">

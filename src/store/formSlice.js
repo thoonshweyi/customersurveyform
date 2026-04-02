@@ -22,9 +22,15 @@ export const formFeatures = {
           name: 'easyApply',
           action: 'Attach CV',
           questionNames: ['Attach CV'],
-          mode: 'full'
      }]
 };
+
+const formSettings = {
+     [FORM_IDS.PRO1_GLOBAL_CV_FORM]: [{
+          featureName: 'easyApply',
+          applyMode: 'action'
+     }]
+}
 
 const servicesAPI = {
      fetchFormContents : async()=>{
@@ -37,6 +43,11 @@ const servicesAPI = {
         // simulate API call
         await new Promise(resolve => setTimeout(resolve,100))
         return formFeatures;
+     },
+     fetchFormSettings : async()=>{
+        // simulate API call
+        await new Promise(resolve => setTimeout(resolve,100))
+        return formSettings;
      },
 }
 
@@ -58,12 +69,22 @@ export const fetchFormFeatures = createAsyncThunk( "services/fetchFormFeatures",
     }
 });
 
+export const fetchFormSettings = createAsyncThunk( "services/fetchFormSettings", async(_,{rejectWithValue})=>{
+    try{
+        const data = await servicesAPI.fetchFormSettings();
+        return data;
+    }catch(error){
+        return rejectWithValue(error.message);
+    }
+});
+
 const formSlice = createSlice({
      name: 'forms',
      initialState:{
           datas:[],
-          contents: [],
-          features: [],
+          contents: {},
+          features: {},
+          settings: {},
           loading:false,
           error: null,
           filters: {
@@ -77,16 +98,25 @@ const formSlice = createSlice({
                state.error = null,
                state.bookingError = null
           },
-         setFilters(state,action){
-               state.filters = {...state.filters,...action.payload};
-         },
-         clearFilters(state){
+          setFilters(state,action){
+                    state.filters = {...state.filters,...action.payload};
+          },
+          clearFilters(state){
                state.filters = {
                     category: 'all',
                     priceRange: {min:0,max:10000},
                     rating: 0,
                }
-         }
+          },
+          setFormSetting(state, action) {
+               const { formId, data } = action.payload;
+               console.log(state.settings[formId]);
+               state.settings[formId] = {
+                    ...(state.settings[formId] || {}),
+                    ...data
+               };
+               console.log(state.settings[formId]);
+          }
      },
      extraReducers: (builder)=>{
           builder
@@ -117,8 +147,21 @@ const formSlice = createSlice({
                     state.loading = false;
                     state.error = action.error.message || "Failed to load services";
                })
+               .addCase(fetchFormSettings.pending,(state)=>{
+                    state.loading =true;
+                    state.error = null;
+               })
+               .addCase(fetchFormSettings.fulfilled,(state,action)=>{
+                    state.loading = false;
+                    state.settings = action.payload;
+                    // console.log(action.payload)
+               })
+               .addCase(fetchFormSettings.rejected,(state,action)=>{
+                    state.loading = false;
+                    state.error = action.error.message || "Failed to load services";
+               })
      }
 });
 
-export const {clearError,setFilters,clearFilters} = formSlice.actions;
+export const {clearError,setFilters,clearFilters,setFormSetting} = formSlice.actions;
 export default formSlice.reducer;
