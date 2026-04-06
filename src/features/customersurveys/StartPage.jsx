@@ -45,19 +45,23 @@ export default function StartPage({ form ={}, content={}, feature=[], featureHan
                     </p>
                     
                     <div className="d-flex flex-column flex-lg-row gap-2">
-                        <button
-                            className="btn btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
-                            onClick={(e)=>{
-                                featureHandlers['nextStep'](e)
-                            }}
-                        >
-                            {content.action}
-                        </button>
+                        {
+                            content.action && (
+                                <button
+                                    className="btn btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
+                                    onClick={(e)=>{
+                                        featureHandlers['nextStep'](e)
+                                    }}
+                                >
+                                    {content.action}
+                                </button>
+                            )
+                        }
 
                         {feature.map((f) => (
                             <button
                                 key={f.name}
-                                className="btn bg-danger btn-custom flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite"
+                                className={`btn btn-custom ${f.styles} flex-fill px-4 py-2 fw-semibold animate__animated animate__pulse animate__infinite`}
                                 onClick={(e) => {
                                     featureHandlers[f.name]?.();
                                     featureHandlers['nextStep'](e)

@@ -12,17 +12,26 @@ const formContents = {
      [FORM_IDS.PRO1_GLOBAL_CV_FORM] : {
         display_title: "Welcome to PRO1 Global Job Fair",
         slogan: "Thank you for your interest in joining PRO1. Please register now & complete this short form to apply for job opportunities.",
-        action: "Apply Now",
+     //    action: "Apply Now",
         privacy_note: "Your information will be kept confidential and used only for recruitment purposes.",
      }
 };
 
 export const formFeatures = {
-     [FORM_IDS.PRO1_GLOBAL_CV_FORM]: [{
-          name: 'easyApply',
-          action: 'Attach CV',
-          questionNames: ['Attach CV'],
-     }]
+     [FORM_IDS.PRO1_GLOBAL_CV_FORM]: [
+          {
+               name: 'fullApply',
+               action: 'Apply Now',
+               questionNames: ['Attach CV'],
+               styles: 'btn-custom'
+          }
+          ,{
+               name: 'easyApply',
+               action: 'Attach CV',
+               questionNames: ['Attach CV'],
+               styles: 'bg-danger'
+          }
+     ]
 };
 
 const formSettings = {

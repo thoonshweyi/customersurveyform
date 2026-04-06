@@ -7,13 +7,14 @@ const getQuestionIdsByName = (form, names = []) => {
         .map(q => q.id);
 };
 
-export const getEasyQuestionIds = (form) => {
+export const getEasyQuestionIds = (form,extendedQuestionNames = []) => {
     const featureConfig = formFeatures[form.id]?.find(
         f => f.name === "easyApply"
     );
 
     const questionNames = [
         ...(featureConfig?.questionNames || []),
+        ...extendedQuestionNames,
     ];
 
     return getQuestionIdsByName(form, questionNames);
@@ -24,19 +25,8 @@ export const createFormFeatureHandlers = ({ form, setForm, questionAnswers, setQ
 
     return {
         easyApply: () => {
-            const featureConfig = formFeatures[form.id]?.find(
-                f => f.name === "easyApply"
-            );
-            let questionIds = [];
 
-            const questionNames = [
-                ...(featureConfig?.questionNames || []),
-                'Name',
-                'Phone'
-            ];
-            questionIds = getQuestionIdsByName(form, questionNames);
-
-            const ids = Array.isArray(questionIds) ? questionIds : [questionIds];
+            const easyIds = getEasyQuestionIds(form,['Name','Phone']);
 
             const newForm = {
                 ...form,
@@ -44,7 +34,7 @@ export const createFormFeatureHandlers = ({ form, setForm, questionAnswers, setQ
                     .map(section => ({
                         ...section,
                         questions: section.questions
-                            .filter(q => ids.includes(q.id))
+                            .filter(q => easyIds.includes(q.id))
                             .map(q => ({
                                 ...q,
                                 required: true
@@ -54,17 +44,28 @@ export const createFormFeatureHandlers = ({ form, setForm, questionAnswers, setQ
             };
 
             setForm(newForm);
-
-            const initialAnswers = {};
-            newForm.sections.forEach(section => {
-                section.questions.forEach(q => {
-                    initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
-                });
-            });
-
-            setQuestionAnswers(initialAnswers);
         },
+        fullApply: () => {
 
+            const easyIds = getEasyQuestionIds(form);
+
+            const newForm = {
+                ...form,
+                sections: form.sections
+                    .map(section => ({
+                        ...section,
+                        questions: section.questions
+                            .filter(q => !easyIds.includes(q.id))
+                            .map(q => ({
+                                ...q,
+                                required: true
+                            }))
+                    }))
+                    .filter(section => section.questions.length > 0)
+            };
+
+            setForm(newForm);
+        },
         uploadCV: () => {
             console.log("Upload CV for form", form.id);
         }

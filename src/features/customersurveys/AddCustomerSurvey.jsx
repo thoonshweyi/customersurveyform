@@ -44,25 +44,14 @@ export default function AddCustomerSurvey() {
 		}
 	}
 
-	const initQuestionAnswers = async ()=>{
+	const fetchForm = async ()=>{
 		setForceLoading(true);
 		try {
 			await axios.get(`${APP_CONFIG.backendURL}/api/forms/${form_id}`).then(res => {
 				const fetched = res.data;
 				// console.log(fetched);
 				setForm(fetched); //
-
-				// Initialize answers for all questions
-				const initialAnswers = {};
-				fetched.sections.forEach(section => {
-					section.questions.forEach(q => {
-						initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
-					});
-				});
-
-				setQuestionAnswers(initialAnswers);
-				// console.log(questionAnswers);
-
+	
 			});
 			
 			await dispatch(fetchFormContents());
@@ -76,9 +65,25 @@ export default function AddCustomerSurvey() {
 		}
 	}
 
+	const buildInitialAnswers = () => {
+		// Initialize answers for all questions
+		const initialAnswers = {};
+		form.sections.forEach(section => {
+			section.questions.forEach(q => {
+				initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+			});
+		});
+
+		setQuestionAnswers(initialAnswers);
+		// console.log(initialAnswers);
+	};
+
 	useEffect(() => {
-		initQuestionAnswers();
+		fetchForm();
 	}, []);
+	useEffect(() => {
+		buildInitialAnswers();
+	}, [form]);
 	useEffect(() => {
 		dispatch(fetchbranches())
 		dispatch(setcurrentbranch(branch_id))
@@ -248,7 +253,7 @@ export default function AddCustomerSurvey() {
 
   const clearForm = ()=>{
 		setStep(-1);
-		initQuestionAnswers();
+		fetchForm();
 		setErrors({});
 		setForm({ title: "", description: "", sections: [] })
   }
@@ -270,14 +275,14 @@ export default function AddCustomerSurvey() {
 		nextStep
 	}
 	
-	const currentSetting = settings[form.id] || {};
-	const mode = currentSetting.applyMode || "full";
-	const easyIds = getEasyQuestionIds(form);
+	// const currentSetting = settings[form.id] || {};
+	// const mode = currentSetting.applyMode || "full";
+	// const easyIds = getEasyQuestionIds(form);
 
-	currentQuestions = (currentSection.questions || []).filter(q => {
-		if (mode === "easy") return true;
-		return !easyIds.includes(q.id);
-	});
+	// currentQuestions = (currentSection.questions || []).filter(q => {
+	// 	if (mode === "easy") return true;
+	// 	return !easyIds.includes(q.id);
+	// });
 	// End Register Form Feature
 
 
