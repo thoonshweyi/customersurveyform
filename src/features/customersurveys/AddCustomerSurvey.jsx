@@ -233,9 +233,17 @@ export default function AddCustomerSurvey() {
 	formData.append("branch_id", branch_id);
 	// formData.append("questionanswers", questionAnswers);
 	// formData.append("questionfiles", files);
+	console.log(questionAnswers);
 
 	Object.keys(questionAnswers).forEach((key) => {
-		formData.append(`questionanswers[${key}]`, questionAnswers[key]);
+		const value = questionAnswers[key];
+		if (Array.isArray(value)) {
+			value.forEach((v, i) => {
+				formData.append(`questionanswers[${key}][${i}]`, v);
+			});
+		} else {
+			formData.append(`questionanswers[${key}]`, value);
+		}
 	});
 	Object.keys(files).forEach((key) => {
 		formData.append(`questionfiles[${key}]`, files[key]);
