@@ -124,31 +124,81 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
               type="file"
               className="form-control underline-only"
               name={q.id}
-              onChange={(e) => {
-                const file = e.target.files[0];
-                filesHandler(e,q.id);
+			  	multiple
+			  	onChange={(e) => {
+					const selectedFiles = Array.from(e.target.files);
 
-                if (file) {
-                  const previewUrl = URL.createObjectURL(file);
+					filesHandler(e, q.id);
 
-                  setFilePreviews((prev) => ({
-                    ...prev,
-                    [q.id]: previewUrl
-                  }));
-                }
-              }}
+					const previews = selectedFiles.map(file => ({
+						url: URL.createObjectURL(file),
+						type: file.type,
+						name: file.name
+					}));
+
+					setFilePreviews(prev => ({
+					...prev,
+					[q.id]: previews
+					}));
+				}}
             />
             {filePreviews[q.id] && (
-              <div>
-                {/* <p className="mb-1">Preview:</p> */}
-                <img
-                  src={filePreviews[q.id]}
-                  className="img-fluid rounded border"
-                  alt={q.name}
-                  style={{ maxHeight: "250px", objectFit: "contain" }}
-                />
-              </div>
-            )}
+				<div className="d-flex flex-wrap gap-2 mt-2">
+					{filePreviews[q.id].map((file, index) => {
+					const { url, type, name } = file;
+
+					if (type.startsWith("image/")) {
+						return (
+						<img
+							key={index}
+							src={url}
+							alt={name}
+							className="rounded border"
+							style={{ width: "100px",  maxHeight: "100px", objectFit: "cover" }}
+						/>
+						);
+					}
+
+					if (type === "application/pdf") {
+						return (
+						<iframe
+							key={index}
+							src={url}
+							title={name}
+							style={{ width: "120px", height: "120px", border: "1px solid #ccc" }}
+						/>
+						);
+					}
+
+					if (type.startsWith("video/")) {
+						return (
+						<video key={index} width="120" height="120" controls>
+							<source src={url} type={type} />
+						</video>
+						);
+					}
+
+					if (type.startsWith("audio/")) {
+						return (
+						<audio key={index} controls>
+							<source src={url} type={type} />
+						</audio>
+						);
+					}
+
+					// fallback
+					return (
+						<div
+						key={index}
+						className="border rounded p-2 d-flex align-items-center justify-content-center"
+						style={{ width: "120px",  maxHeight: "120px", fontSize: "12px" }}
+						>
+						📄 {name}
+						</div>
+					);
+					})}
+				</div>
+			)}
             </>
           )}
         </div>

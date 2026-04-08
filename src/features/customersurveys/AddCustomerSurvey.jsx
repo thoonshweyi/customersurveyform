@@ -33,16 +33,20 @@ export default function AddCustomerSurvey() {
 	
 
 	const [files, setFiles] = useState([]);
-	const filesHandler = (e,qId)=>{
-		const file = e.target.files[0];
 
-		if(file){
-			setFiles((prev)=>({
-				...prev,
-				[qId]: file
-			})); 
+	const filesHandler = (e, qId) => {
+		const selectedFiles = Array.from(e.target.files);
+
+		if (selectedFiles.length > 5) {
+			alert("You can upload maximum 5 files.");
+			return;
 		}
-	}
+
+		setFiles(prev => ({
+			...prev,
+			[qId]: selectedFiles
+		}));
+	};
 
 	const fetchForm = async ()=>{
 		setForceLoading(true);
@@ -70,6 +74,7 @@ export default function AddCustomerSurvey() {
 		const initialAnswers = {};
 		form.sections.forEach(section => {
 			section.questions.forEach(q => {
+				if (q.type === "file") return;
 				initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
 			});
 		});
@@ -246,7 +251,14 @@ export default function AddCustomerSurvey() {
 		}
 	});
 	Object.keys(files).forEach((key) => {
-		formData.append(`questionfiles[${key}]`, files[key]);
+		const fileValue = files[key];
+		if (Array.isArray(fileValue)) {
+			fileValue.forEach((file, i) => {
+				formData.append(`questionfiles[${key}][${i}]`, file);
+			});
+		} else {
+			formData.append(`questionfiles[${key}]`, fileValue);
+		}
 	});
 
 	try{

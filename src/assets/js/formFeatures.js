@@ -58,7 +58,7 @@ export const createFormFeatureHandlers = ({ form, setForm, questionAnswers, setQ
                             .filter(q => !easyIds.includes(q.id))
                             .map(q => ({
                                 ...q,
-                                required: true
+                                // required: true
                             }))
                     }))
                     .filter(section => section.questions.length > 0)
