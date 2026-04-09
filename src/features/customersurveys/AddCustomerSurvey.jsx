@@ -34,20 +34,6 @@ export default function AddCustomerSurvey() {
 
 	const [files, setFiles] = useState([]);
 
-	const filesHandler = (e, qId) => {
-		const selectedFiles = Array.from(e.target.files);
-
-		if (selectedFiles.length > 5) {
-			alert("You can upload maximum 5 files.");
-			return;
-		}
-
-		setFiles(prev => ({
-			...prev,
-			[qId]: selectedFiles
-		}));
-	};
-
 	const fetchForm = async ()=>{
 		setForceLoading(true);
 		try {
@@ -219,6 +205,7 @@ export default function AddCustomerSurvey() {
     };
 
   const submitHandler = async (e) => { 
+	console.log(files);
     e.preventDefault();
 	if (!validateAllStep()) {
 		return false;
@@ -350,7 +337,7 @@ export default function AddCustomerSurvey() {
 							answers={questionAnswers}
 							onAnswerChange={handleAnswerChange}
 							errors={errors}
-							filesHandler={filesHandler}
+							setFiles={setFiles}
 							/>
 						</div>
 					)}

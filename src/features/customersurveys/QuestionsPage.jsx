@@ -1,11 +1,50 @@
 import React,{useState,useEffect} from "react";
-export default function QuestionsPage({ questions, answers, onAnswerChange, errors = {}, filesHandler}) {
+export default function QuestionsPage({ questions, answers, onAnswerChange, errors = {}, setFiles}) {
 
 	const isChecked = (q,opt)=>
               q.type === "checkbox"
                 ? answers[q.id]?.includes(opt.id)
                 : answers[q.id] === opt.id;
-  const [filePreviews,setFilePreviews] = useState({});
+  	const [filePreviews,setFilePreviews] = useState({});
+
+	const filesChangeHandler = (e, qId) => {
+		const selectedFiles = Array.from(e.target.files);
+		const limitedFiles = selectedFiles.slice(0, 5);
+
+		setFiles(prev => ({
+			...prev,
+			[qId]: limitedFiles
+		}));
+
+		const previews = limitedFiles.map(file => ({
+			url: URL.createObjectURL(file),
+			type: file.type,
+			name: file.name
+		}));
+
+		setFilePreviews(prev => ({
+		...prev,
+		[qId]: previews
+		}));
+
+		e.target.value = null;
+	};
+
+	const fileRemoveHandler = (qId, index) => {
+		// remove from actual files
+		setFiles(prev => ({
+			...prev,
+			[qId]: prev[qId].filter((_, i) => i !== index)
+		}));
+
+		// remove from preview
+		setFilePreviews(prev => ({
+			...prev,
+			[qId]: prev[qId].filter((_, i) => i !== index)
+		}));
+
+	};
+
   return (
     <>
       {questions.map((q) => (
@@ -122,82 +161,74 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
             <>
             <input
               type="file"
-              className="form-control underline-only"
+			  id={`file-${q.id}`}
+              className="form-control underline-only d-none"
               name={q.id}
 			  	multiple
 			  	onChange={(e) => {
-					const selectedFiles = Array.from(e.target.files);
-
-					filesHandler(e, q.id);
-
-					const previews = selectedFiles.map(file => ({
-						url: URL.createObjectURL(file),
-						type: file.type,
-						name: file.name
-					}));
-
-					setFilePreviews(prev => ({
-					...prev,
-					[q.id]: previews
-					}));
+					filesChangeHandler(e, q.id);
 				}}
             />
+			<label
+			htmlFor={`file-${q.id}`}
+			className="file-upload-label w-100 text-center"
+			>
+			📎 Click to attach files (Max 5)
+			</label>
             {filePreviews[q.id] && (
-				<div className="d-flex flex-wrap gap-2 mt-2">
-					{filePreviews[q.id].map((file, index) => {
-					const { url, type, name } = file;
+			<div className="file-preview-container mt-2">
+				{filePreviews[q.id].map((file, index) => {
+				const { url, type, name } = file;
 
-					if (type.startsWith("image/")) {
-						return (
-						<img
-							key={index}
-							src={url}
-							alt={name}
-							className="rounded border"
-							style={{ width: "100px",  maxHeight: "100px", objectFit: "cover" }}
-						/>
-						);
-					}
+				return (
+					<div key={index} className="file-item">
+					
+					{/* REMOVE BUTTON */}
+					<button
+						type="button"
+						className="file-remove-btn"
+						onClick={() => fileRemoveHandler(q.id, index)}
+					>
+						✕
+					</button>
 
-					if (type === "application/pdf") {
-						return (
-						<iframe
-							key={index}
-							src={url}
-							title={name}
-							style={{ width: "120px", height: "120px", border: "1px solid #ccc" }}
-						/>
-						);
-					}
+					{/* IMAGE */}
+					{type.startsWith("image/") && (
+						<img src={url} alt={name} className="file-preview-img" />
+					)}
 
-					if (type.startsWith("video/")) {
-						return (
-						<video key={index} width="120" height="120" controls>
-							<source src={url} type={type} />
+					{/* PDF */}
+					{type === "application/pdf" && (
+						<iframe src={url} title={name} className="file-preview-frame" />
+					)}
+
+					{/* VIDEO */}
+					{type.startsWith("video/") && (
+						<video className="file-preview-video" controls>
+						<source src={url} type={type} />
 						</video>
-						);
-					}
+					)}
 
-					if (type.startsWith("audio/")) {
-						return (
-						<audio key={index} controls>
-							<source src={url} type={type} />
+					{/* AUDIO */}
+					{type.startsWith("audio/") && (
+						<audio className="file-preview-audio" controls>
+						<source src={url} type={type} />
 						</audio>
-						);
-					}
+					)}
 
-					// fallback
-					return (
-						<div
-						key={index}
-						className="border rounded p-2 d-flex align-items-center justify-content-center"
-						style={{ width: "120px",  maxHeight: "120px", fontSize: "12px" }}
-						>
-						📄 {name}
+					{/* FALLBACK */}
+					{!type.startsWith("image/") &&
+						type !== "application/pdf" &&
+						!type.startsWith("video/") &&
+						!type.startsWith("audio/") && (
+						<div className="file-preview-fallback">
+							📄 {name}
 						</div>
-					);
-					})}
-				</div>
+						)}
+					</div>
+				);
+				})}
+			</div>
 			)}
             </>
           )}
