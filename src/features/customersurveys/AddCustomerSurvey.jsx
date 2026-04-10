@@ -58,14 +58,19 @@ export default function AddCustomerSurvey() {
 	const buildInitialAnswers = () => {
 		// Initialize answers for all questions
 		const initialAnswers = {};
+		const initialFiles = {};
 		form.sections.forEach(section => {
 			section.questions.forEach(q => {
-				if (q.type === "file") return;
-				initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+				if (q.type === "file") {
+					initialFiles[q.id] = [];
+				} else {
+					initialAnswers[q.id] = q.type === "checkbox" ? [] : "";
+				}
 			});
 		});
 
 		setQuestionAnswers(initialAnswers);
+		setFiles(initialFiles);
 		// console.log(initialAnswers);
 	};
 
@@ -225,7 +230,7 @@ export default function AddCustomerSurvey() {
 	formData.append("branch_id", branch_id);
 	// formData.append("questionanswers", questionAnswers);
 	// formData.append("questionfiles", files);
-	console.log(questionAnswers);
+	console.log(questionAnswers,formData);
 
 	Object.keys(questionAnswers).forEach((key) => {
 		const value = questionAnswers[key];

@@ -49,7 +49,15 @@ export default function QuestionsPage({ questions, answers, onAnswerChange, erro
     <>
       {questions.map((q) => (
         <div key={q.id} className="csform-card mb-4">
-          <label className="form-label">{q.name} {q.required && <span className="text-danger">*</span>}</label>
+          	<label className="form-label">
+				{q.name} 
+				{q.required && <span className="text-danger">*</span>}
+				{(q.name == 'Phone' || q.en_name == 'Phone') && 
+					<>
+					<small className="text-muted ms-2 opacity-75 fs-6"><i>Example: </i><span className="badge bg-light text-muted border"> (09 123 456 789)</span></small>
+					</>
+				}
+			</label>
 
           {errors[q.id] && (
             <div className="text-danger small mb-1">
