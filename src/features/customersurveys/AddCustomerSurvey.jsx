@@ -12,8 +12,10 @@ import FinishPage from "./FinishPage.jsx";
 import FullPageLoader from "../../components/FullPageLoader.jsx";
 import {fetchFormContents,setFilters,clearFilters,clearError, fetchFormFeatures,FORM_IDS, fetchFormSettings} from "../../store/formSlice";
 import { createFormFeatureHandlers,getEasyQuestionIds } from "./../../assets/js/formFeatures.js";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAnglesLeft } from "@fortawesome/free-solid-svg-icons";
 export default function AddCustomerSurvey() {
+	const navigate = useNavigate();
 	
 	const dispatch = useDispatch();
 	const {datas,contents,features,settings,loading: formLoading,error,filters} = useSelector((state)=>state.forms)
@@ -363,6 +365,25 @@ export default function AddCustomerSurvey() {
 					{loading ? "Processing..." : "Submit"}
 					</button>
 				)}
+				</div>
+
+				<div className="d-flex justify-content-between mt-4">
+					{features[form.id]?.length > 0 && (
+						<a href="#" className="link-primary text-decoration-none fw-semibolds" onClick={
+							async (e)=> {
+								e.preventDefault();
+								await fetchForm();
+								setStep(-1);
+								// navigate(`/surveyresponses/${form_id}/${branch_id}/create`);
+							}
+						}>
+						<FontAwesomeIcon icon={faAnglesLeft} /> Back
+						</a>
+					)}
+
+					{/* <a href="#" className="link-primary text-decoration-none fw-semibolds">
+						Clear Form
+					</a> */}
 				</div>
 			</form>
 			</div>
