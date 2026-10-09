@@ -10,7 +10,7 @@ export const FORM_IDS = {
 // Mock API Service
 const formContents = {
      [FORM_IDS.PRO1_GLOBAL_CV_FORM] : {
-        display_title: "Welcome to PRO1 Global Job Fair",
+        display_title: "Welcome to PRO1 Global",
         slogan: "Thank you for your interest in joining PRO1. Please register now & complete this short form to apply for job opportunities.",
      //    action: "Apply Now",
         privacy_note: "Your information will be kept confidential and used only for recruitment purposes.",
